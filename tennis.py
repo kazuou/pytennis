@@ -1,4 +1,4 @@
-""" tobi.py """
+""" tennis.py """
 
 #【メモ】
 #3D座標は x = 0, z = 0が画面の中心で、y = 0が画面の手前。キャラクターのx, z座標はキャラクターの中心。
@@ -308,7 +308,7 @@ def location_in_view2(x1, y1, z1, size_x, size_z, adj_x, adj_y, adj_z):
 def size_in_view(y1, size_x, size_z,adj_y):
     """ 3D座標から2D上のサイズ算出 """
     y1=(y1+1000-adj_y)/100
-    if(y1 <= 10):
+    if(y1 <= 0):
         y1 = 10
     size_x2 = int(size_x / (y1/10 + 1))
     size_z2 = int(size_z / (y1/10 + 1))
