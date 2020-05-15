@@ -16,7 +16,6 @@ def drowc(x):
     print(len(x))
     for i in x :
         print ("x=",i.x,"y=",i.y,"z=",i.z)
-        
 
 def drowx(x):
     print(x)

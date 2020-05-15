@@ -19,7 +19,7 @@ pygame.key.set_repeat(5, 5)
 #SURFACE = pygame.display.set_mode((1200, 600))
 SURFACE = pygame.display.set_mode((600+600, 300+600)) #1000x900
 FPSCLOCK = pygame.time.Clock()
-pygame.display.set_caption("Tobishokunin's Commuting")
+pygame.display.set_caption("AI Tennis")
 sysfont = pygame.font.SysFont(None, 24)
 
 baseline2 = 2377
