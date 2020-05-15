@@ -17,7 +17,7 @@ print(os.getcwd())
 pygame.init()
 pygame.key.set_repeat(5, 5)
 #SURFACE = pygame.display.set_mode((1200, 600))
-SURFACE = pygame.display.set_mode((400, 600))
+SURFACE = pygame.display.set_mode((600+600, 300+600)) #1000x900
 FPSCLOCK = pygame.time.Clock()
 pygame.display.set_caption("Tobishokunin's Commuting")
 sysfont = pygame.font.SysFont(None, 24)
@@ -36,6 +36,8 @@ netline=1188.5
 field_data = (fieldxl,fieldy1,fieldxr,fieldy2)
 
 #イメージ設定
+image_court = pygame.image.load("court.png")
+
 image_background = pygame.image.load("background.jpg")
 image_title = pygame.image.load("title.png")
 image_start = pygame.image.load("start.png")
@@ -291,18 +293,18 @@ class Character:
 
 def location_in_view(x1, y1, z1, size_x, size_z, adj_x, adj_y, adj_z):
     """ 3D座標から2D上の座標算出 """
-    x1=x1/2
-    y1=(y1+1000-adj_y)/100 #10m後ろからの視点
+    x1=x1
+    y1=(y1+1000-adj_y)/50 #10m後ろからの視点
     if(y1 <= 0):
         y1 = 0
-    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 200 - int(size_x * 0.5 / (y1/10 + 1))
-    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 150 - int(size_z * 0.5 / (y1/10 + 1))
+    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 300 - int(size_x * 0.5 / (y1/10 + 1))
+    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 300 - int(size_z * 0.5 / (y1/10 + 1))
     return (x2, z2)
 
 def location_in_view2(x1, y1, z1, size_x, size_z, adj_x, adj_y, adj_z):
     """ 3D座標から2D上の座標算出 """
-    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 200 - int(size_x * 0.5 / (y1/10 + 1))
-    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 150 - int(size_z * 0.5 / (y1/10 + 1))
+    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 300 - int(size_x * 0.5 / (y1/10 + 1))
+    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 300 - int(size_z * 0.5 / (y1/10 + 1))
     return (x2, z2)
 
 def size_in_view(y1, size_x, size_z,adj_y):
@@ -313,6 +315,10 @@ def size_in_view(y1, size_x, size_z,adj_y):
     size_x2 = int(size_x / (y1/10 + 1))
     size_z2 = int(size_z / (y1/10 + 1))
     return (size_x2, size_z2)
+
+def draw_foreground():
+    #右のコート表示
+    SURFACE.blit(image_court, (600, 0))
 
 
 def draw_background(adjust_x, adjust_y, adjust_z, counter):
@@ -330,10 +336,13 @@ def draw_background(adjust_x, adjust_y, adjust_z, counter):
     #フィールドのサイズ
     x1,y1,x2,y2 = field_data
     a, b = location_in_view(x2, y2 ,150, 0, 0, adjust_x, adjust_y, adjust_z) #地面
-    pygame.draw.rect(SURFACE, (189,104,86), (0, b, 400, 300))
+
+#    pygame.draw.rect(SURFACE, (189,104,86), (0, b, 400, 10))
+    pygame.draw.polygon(SURFACE, (189,104,86), ((0, b),(600,b),(600,600),(0,600)))
+
 
     #テニスコートのサイズ　ネットの位置は1188.5
-#   court_data = (-548.5,2377,543.5,0)
+#   court_data = (-548.5,2377,543.5,0)®
     x1,y1,x2,y2 = court_data
 
     pygame.draw.polygon(SURFACE,(0, 128, 0), #テニスコート
@@ -390,19 +399,6 @@ def score_indication(seta,setb,gamea,gameb,pointa,pointb):
     image = sysfont.render(
         "{:>2}-{:>2}".format(pointa,pointb), True, (255, 255, 255))
     SURFACE.blit(image, (322, 17))
-
-
-def score_indication2(score, best_score, counter, damage):
-    """ スコア表示 """
-    #image = sysfont.render( #ベストスコア
-    #    "Best Score", True, (255, 255, 255))
-    #SURFACE.blit(image, (10, 2))
-    #image = sysfont.render(
-    #    "{:0>6}".format(best_score), True, (255, 255, 255))
-    #SURFACE.blit(image, (36, 17))
-    image = sysfont.render( #スコア
-        "Sets", True, (255, 255, 255))
-    SURFACE.blit(image, (120, 2))
 
 def main():
     """ メインルーチン """
@@ -525,6 +521,8 @@ def main():
             title_y -= 50 if title_y > 0 else 0
             draw_character(image_title, 0, title_y,-52,  350, 103, adjust_x, adjust_y, adjust_z)
             draw_character(image_start, 0, title_y, 52,  300, 35, adjust_x, adjust_y, adjust_z)
+
+            draw_foreground()
 
             #画面アップデート
             pygame.display.update()
@@ -686,6 +684,9 @@ def main():
             if score > best_score:
                 best_score = score
             score_indication(seta,setb,gamea,gameb,pointa,pointb)
+
+            #右のコート表示
+            draw_foreground()
 
             #画面アップデート
             pygame.display.update()
