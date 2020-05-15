@@ -96,6 +96,8 @@ def main():
     counter = 0
     print("Hello World")
 
+    image_man3 = pygame.image.load("man3.png")
+
     #マウスカーソル非表示
     pygame.mouse.set_visible(False)
 
@@ -111,6 +113,7 @@ def main():
 
         #背景描写
         draw_background(adjust_x, adjust_y, adjust_z, counter)
+        SURFACE.blit(image_man3, (300, 450))
 
         #画面コピー
         filler = SURFACE.copy()

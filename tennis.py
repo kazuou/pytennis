@@ -28,10 +28,10 @@ servieline2 = 1828.5
 servieline1 = 548.5
 
 court_data = (-548.5,0,543.5,2377)
-fieldxl=-548.5-500
-fieldxr=548.5+500
-fieldy1= -1000
-fieldy2=2377+1000
+fieldxl=-548.5-652
+fieldxr=548.5+652
+fieldy1= -612
+fieldy2=2377+612
 netline=1188.5
 field_data = (fieldxl,fieldy1,fieldxr,fieldy2)
 
@@ -71,30 +71,29 @@ class Character:
     def __init__(self):
         self.status = 0
         self.jump_status = 0
-        self.image_type = 0
-        self.x = 999
+        self.image_type = 0 #
+        self.x = 0
         self.y = 0
-        self.z = 999
+        self.z = 0
         self.vx = 0
         self.vy = 0
         self.vz = 0
+        self.rotx = 0
+        self.roty = 0
+        self.rotz = 0
         self.width = 0
         self.height = 0
+        self.mag = 1 #サイズと表示の倍率(ボールを大きく見せるため)
+        self.color = (255,255,255)
         self.image_man = pygame.image.load("man.png")
+        self.image_man2 = pygame.image.load("man.png")
         self.image_man3 = pygame.image.load("man3.png")
+        self.image_man4 = pygame.image.load("man4.png")
+        self.image_ball = pygame.image.load("TennisBall.png")
 
-        self.image_man_bright = pygame.image.load("man.png")#ミス復帰時
-        self.image_man_failed = pygame.image.load("man_failed.gif")
-        self.image_man_smile = pygame.image.load("man.png")#finish時の画像
         self.image_net = pygame.image.load("net.png")
-        self.image_frog = pygame.image.load("TennisBall.png")
-        self.image_frog_jump1 = pygame.image.load("TennisBall.png")
-        self.image_frog_jump2 = pygame.image.load("TennisBall.png")
-        self.image_bird_right = pygame.image.load("man3.png")
-        self.image_bird_left = pygame.image.load("man3.png")
         self.image_omusubi = pygame.image.load("omusubi.gif")
-        self.image_house = pygame.image.load("trophy.png")
-        self.image = self.image_frog
+        self.image_trophy = pygame.image.load("trophy.png")
 
     #表示オン
     def on(self, image_type, x = 0, z = 0, y = baseline2):
@@ -111,18 +110,19 @@ class Character:
             self.width = 100
             self.height = 170
             self.image = self.image_man
-        if self.image_type == 1: #味方
+        if self.image_type == 1: #ペア
             self.x = -200
             self.y = servieline1
-            self.z = 85
+            self.z = 70
             self.vx = 0
             self.vy = 0
             self.vz = 0
+            self.color = (0,0,0)
             self.width = 100
             self.height = 170
             self.image = self.image_man
         if self.image_type == 2: #ネット
-            self.x = 0
+            self.x = -300
             self.y = netline
             self.z = 115
             self.vx = 0
@@ -140,7 +140,9 @@ class Character:
             self.vz = -18.0
             self.width = 30
             self.height = 30
-            self.image = self.image_frog
+            self.color = (255,255,0)
+            self.mag = 30
+            self.image = self.image_ball
         if self.image_type == 4: #相手プレーヤー
             self.x = -400
             self.y = baseline2
@@ -150,6 +152,7 @@ class Character:
             self.vz = (random.randint(0, 1) * 2 - 1) * 5
             self.width = 80
             self.height = 80
+            self.color = (26,97,167)
             self.image = self.image_man3
         if self.image_type == 5: #相手プレーヤー2
             self.x = 400
@@ -160,7 +163,8 @@ class Character:
             self.vz = (random.randint(0, 1) * 2 - 1) * 5
             self.width = 80
             self.height = 80
-            self.image = self.image_bird_left
+            self.color =(255,0,0)
+            self.image = self.image_man4
 
         if self.image_type == 10: #おむすび
             self.x = random.randint(-170, 170)
@@ -181,7 +185,7 @@ class Character:
             self.vz = 0
             self.width = 360
             self.height = 310
-            self.image = self.image_house
+            self.image = self.trophy
 
     #移動
     def move(self, x, y, z, status):
@@ -220,18 +224,12 @@ class Character:
                 self.vx += 1
             if (self.x >= 100 and self.vx > 0) or (self.x <= -100 and self.vx < 0):
                 self.vx = int(self.vx / 2)
-            if self.vx >= 0:
-                self.image = self.image_bird_right
-            else:
-                self.image=  self.image_bird_left
             if self.z < -110:
                 self.z = -110
                 self.vz = -self.vz
             elif self.z > 40:
                 self.z = 40
                 self.vz = -self.vz
-            if self.y == 40:
-                sound_bird_fly.play()
             if self.y <= netline + 10 and self.vy < 0 :
                 self.vy = -self.vy
                 self.y = netline + 10
@@ -264,6 +262,9 @@ class Character:
                 return(0, self.x)
         else:
             return(0, self.x)
+
+    def position(self):
+        return(self.x,self.y,self.z)
 
     #とび職男ミス
     def failure(self):
@@ -316,9 +317,16 @@ def size_in_view(y1, size_x, size_z,adj_y):
     size_z2 = int(size_z / (y1/10 + 1))
     return (size_x2, size_z2)
 
-def draw_foreground():
+def draw_foreground(chara):
     #右のコート表示
     SURFACE.blit(image_court, (600, 0))
+
+    #ポジションのまるを書く
+    for i in chara:
+        pos =(i.x/4+900,900-i.y/4-612/4)
+        col=i.color
+        pygame.draw.circle(SURFACE, col, pos, 10, width=0)
+
 
 
 def draw_background(adjust_x, adjust_y, adjust_z, counter):
@@ -385,7 +393,7 @@ def score_indication(seta,setb,gamea,gameb,pointa,pointb):
         "Sets", True, (255, 255, 255))
     SURFACE.blit(image, (120, 2))
     image = sysfont.render(
-        "{:0>1}-{:0>1}".format(seta,setb), True, (255, 255, 255))
+        "{:0>5}-{:0>5}".format(seta,setb), True, (255, 255, 255))
     SURFACE.blit(image, (120, 17))
     image = sysfont.render( #距離
         "Game", True, (255, 255, 255))
@@ -409,11 +417,10 @@ def main():
     character = [Character() for i in range(50)]
     character_copy = []
     counter = 0
-    best_score = 0
     score = 0
     point_x = 0
     fullscreen_flag = 0
-    doubles = 0
+    doubles = 1
 
     #マウスカーソル非表示
     pygame.mouse.set_visible(False)
@@ -450,24 +457,24 @@ def main():
         #背景描写
         draw_background(adjust_x, adjust_y, adjust_z, counter)
 
-        #相手プレーヤー表示オン
+        #相手プレーヤー表示オン1
         character[counter_character].on(4)
         counter_character += 1
 
-        #ボール表示オン
+        #ボール表示オン2
         character[counter_character].on(3)
         counter_character += 1
 
-        #ネット表示オン
+        #ネット表示オン3
         character[counter_character].on(2)
         counter_character += 1
 
-        #ペア表示オン
+        #ペア表示オン4
         if doubles == 1:
             character[counter_character].on(1)
             counter_character += 1
 
-        #相手プレーヤー2表示オン
+        #相手プレーヤー2表示オン5
         if doubles == 1 :
             character[counter_character].on(5)
             counter_character += 1
@@ -522,7 +529,12 @@ def main():
             draw_character(image_title, 0, title_y,-52,  350, 103, adjust_x, adjust_y, adjust_z)
             draw_character(image_start, 0, title_y, 52,  300, 35, adjust_x, adjust_y, adjust_z)
 
-            draw_foreground()
+            if doubles == 1:
+                chara=(character[0],character[1],character[4],character[5])
+            else:
+                chara=(character[0],character[1])
+
+            draw_foreground(chara)
 
             #画面アップデート
             pygame.display.update()
@@ -571,14 +583,14 @@ def main():
             #キー入力判定＆とび職人移動
             if character[0].status < 200 and counter <= 5970:
                 pressed = pygame.key.get_pressed()
-                if pressed[K_LEFT] and character[0].x > fieldxl:
+                if pressed[K_LEFT] and character[0].x > fieldxl+50:
                     character[0].x -= 20
-                if pressed[K_RIGHT] and character[0].x < fieldxr:
+                if pressed[K_RIGHT] and character[0].x < fieldxr-50:
                     character[0].x += 20
-                if pressed[K_UP] and character[0].y < netline-100:
-                    character[0].y += 100
-                if pressed[K_DOWN] and character[0].y > fieldy1:
-                    character[0].y -= 100
+                if pressed[K_UP] and character[0].y < netline-50:
+                    character[0].y += 20
+                if pressed[K_DOWN] and character[0].y > fieldy1+50:
+                    character[0].y -= 20
                 if pressed[K_SPACE] and character[0].jump_status == 1:
                     sound_jump.play()
                     character[0].jump_status = 2
@@ -681,12 +693,21 @@ def main():
                     counter_point = 0
 
             #スコア表示
-            if score > best_score:
-                best_score = score
+
+
+            seta =character[0].y
+            setb = 900-character[0].y/4-612/4
+
             score_indication(seta,setb,gamea,gameb,pointa,pointb)
 
             #右のコート表示
-            draw_foreground()
+            if doubles == 1:
+                chara=(character[0],character[1],character[2],character[4],character[5])
+            else:
+                chara=(character[0],character[1],character[2])
+
+            draw_foreground(chara)
+
 
             #画面アップデート
             pygame.display.update()
