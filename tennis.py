@@ -35,6 +35,14 @@ fieldy2=2377+612
 netline=1188.5
 field_data = (fieldxl,fieldy1,fieldxr,fieldy2)
 
+adjust_x = 0.1
+adjust_y = 0.1
+adjust_z = 0.1
+mex = 0
+mey = 0
+mez = 0
+
+
 #イメージ設定
 image_court = pygame.image.load("court.png")
 
@@ -96,14 +104,14 @@ class Character:
         self.image_trophy = pygame.image.load("trophy.png")
 
     #表示オン
-    def on(self, image_type, x = 0, z = 0, y = baseline2):
+    def on(self, image_type):
         self.status = 1
         self.image_type = image_type
         if self.image_type == 0: #私
             self.jump_status = 1
             self.x = 0
             self.y = 0
-            self.z = 70
+            self.z = 0
             self.vx = 0
             self.vy = 0
             self.vz = 0
@@ -113,7 +121,7 @@ class Character:
         if self.image_type == 1: #ペア
             self.x = -200
             self.y = servieline1
-            self.z = 70
+            self.z = 0
             self.vx = 0
             self.vy = 0
             self.vz = 0
@@ -122,22 +130,22 @@ class Character:
             self.height = 170
             self.image = self.image_man
         if self.image_type == 2: #ネット
-            self.x = -300
+            self.x = 0
             self.y = netline
-            self.z = 115
+            self.z = 0
             self.vx = 0
             self.vy = 0
             self.vz = 0
-            self.width = 600
-            self.height = 70
+            self.width = 548+548+91.4+91.4
+            self.height = 91.4
             self.image = self.image_net
         if self.image_type == 3: #ボール
             self.x = -200
             self.y = baseline2
-            self.z = 40
+            self.z = 100
             self.vx = 0
             self.vy = -70
-            self.vz = -18.0
+            self.vz = +18.0
             self.width = 30
             self.height = 30
             self.color = (255,255,0)
@@ -146,71 +154,80 @@ class Character:
         if self.image_type == 4: #相手プレーヤー
             self.x = -400
             self.y = baseline2
-            self.z = 40
+            self.z = 0
             self.vx = 0
             self.vy = -2
             self.vz = (random.randint(0, 1) * 2 - 1) * 5
-            self.width = 80
-            self.height = 80
+            self.width = 100
+            self.height = 100
             self.color = (26,97,167)
             self.image = self.image_man3
         if self.image_type == 5: #相手プレーヤー2
             self.x = 400
             self.y = servieline2
-            self.z = 40
+            self.z = 0
             self.vx = 0
             self.vy = -2
             self.vz = (random.randint(0, 1) * 2 - 1) * 5
-            self.width = 80
-            self.height = 80
+            self.width = 100
+            self.height = 100
             self.color =(255,0,0)
             self.image = self.image_man4
-
         if self.image_type == 10: #おむすび
-            self.x = random.randint(-170, 170)
-            self.y = y
-            self.z = 130
+            self.x = random.randint(-500, 500)
+            self.y = baseline2
+            self.z = 0
             self.vx = 0
-            self.vy = -20
-            self.vz = 0
+            self.vy = -50
+            self.vz = +20
             self.width = 60
             self.height = 40
             self.image = self.image_omusubi
-        if self.image_type == 20: #家
-            self.x = -20
-            self.y = y
-            self.z = -5
+        if self.image_type == 20: #トロフィ
+            self.x = 0
+            self.y = baseline2
+            self.z = 0
             self.vx = 0
             self.vy = -10
             self.vz = 0
             self.width = 360
             self.height = 310
-            self.image = self.trophy
+            self.image = self.image_omusubi
 
     #移動
     def move(self, x, y, z, status):
-        if self.image_type == 1 or self.image_type == 2 or self.image_type == 10 or self.image_type == 20: #樹木、ストッパー、おむすび、家
+        if self.image_type == 20 : #トロファ
             selfy_old = self.y
             self.y += self.vy
             self.z += self.vz
+        elif self.image_type == 10: #おむすび
+            selfy_old = self.y
+            self.y += self.vy
+            self.z += self.vz
+            self.vz -= 1
+            if self.z < 0 :
+                self.vy = -20
+                self.vz = -self.vz *0.1
+                self.z = 0
+
         elif self.image_type == 3: #ボール
             self.status += 1
             self.x += self.vx
             selfy_old = self.y
             self.y += self.vy
             self.z += self.vz
-            self.vz += 1
+            self.vz -= 1
             self.vy = self.vy * 0.98
-            if self.z > 150 :
+            if self.z < 0 :
                 self.vz = -self.vz *0.7
-                self.z = 150
+                self.z = 0
             if (self.y < y and self.vy < 0):
                 self.vy = 80
-                self.vz = -20
+                self.vz = +20
             if (self.y > baseline2 and self.vy > 0):
                 self.vy = -80
-                self.vz = -20
-#            if self.y > character[1].y and self.vz > 0
+                self.vz = +20
+#            if self.y  character[1].y and self.vz > 0
 #                self.vz = -80
 #                self.vz = -20
         elif (self.image_type == 4 or self.image_type == 5): #相手プレーヤー
@@ -224,11 +241,11 @@ class Character:
                 self.vx += 1
             if (self.x >= 100 and self.vx > 0) or (self.x <= -100 and self.vx < 0):
                 self.vx = int(self.vx / 2)
-            if self.z < -110:
-                self.z = -110
+            if self.z > +110:
+                self.z = +110
                 self.vz = -self.vz
-            elif self.z > 40:
-                self.z = 40
+            elif self.z < 0:
+                self.z = 0
                 self.vz = -self.vz
             if self.y <= netline + 10 and self.vy < 0 :
                 self.vy = -self.vy
@@ -292,30 +309,91 @@ class Character:
         if self.image_type == 0:
             self.image = self.image_man_smile
 
-def location_in_view(x1, y1, z1, size_x, size_z, adj_x, adj_y, adj_z):
+def location_in_view(x1, y1, z1):
     """ 3D座標から2D上の座標算出 """
-    x1=x1
-    y1=(y1+1000-adj_y)/50 #10m後ろからの視点
-    if(y1 <= 0):
+#    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 200 - int(size_x * 0.5 / (y1/10 + 1))
+#    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 150 - int(size_z * 0.5 / (y1/10 + 1))
+
+    #カメラの位置は0,0
+    #フイルムの位置は0,-10m後ろ　600x600
+#    az = 0.063
+#    z1 = z1 +150
+#view は　0,-10m,150cm
+    #レンズは0,0,0
+    xl = mex
+    yl = mey-1000
+    zl = mez+150
+
+    #フイルムはレンズの -1000
+    yf = 1000
+
+    x1 = x1 - xl
+    y1 = y1 - yl
+    z1 = z1 - zl
+
+    if y1 <= 0 :
         y1 = 0
-    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 300 - int(size_x * 0.5 / (y1/10 + 1))
-    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 300 - int(size_z * 0.5 / (y1/10 + 1))
-    return (x2, z2)
 
-def location_in_view2(x1, y1, z1, size_x, size_z, adj_x, adj_y, adj_z):
-    """ 3D座標から2D上の座標算出 """
-    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 300 - int(size_x * 0.5 / (y1/10 + 1))
-    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 300 - int(size_z * 0.5 / (y1/10 + 1))
-    return (x2, z2)
+    x2 = int((x1+adjust_x * y1) / (y1/yf + 1))
+    z2 = int((z1+adjust_z*y1) / (y1/yf + 1))
 
-def size_in_view(y1, size_x, size_z,adj_y):
+    x3 = (x2) + 300
+    z3 = 600-zl - (z2)*2
+#    z3 = 300 - (z2)/4
+#    x1=x1/®2
+#    y1=(y1+1000-adj_y)/100 #10m後ろからの視点
+#    if(y1 <= 0):
+#        y1 = 0
+#    x2 = int((x1 + adj_x * y1) / (y1/10 + 1)) + 200 - int(size_x * 0.5 / (y1/10 + 1))
+#    z2 = int((z1 + adj_z * y1) / (y1/10 + 1)) + 150 - int(size_z * 0.5 / (y1/10 + 1))
+    return (x3, z3)
+
+def size_in_view(x1,y1,z1, size_x, size_z):
     """ 3D座標から2D上のサイズ算出 """
-    y1=(y1+1000-adj_y)/100
-    if(y1 <= 0):
-        y1 = 10
-    size_x2 = int(size_x / (y1/10 + 1))
-    size_z2 = int(size_z / (y1/10 + 1))
-    return (size_x2, size_z2)
+#    az = 0
+    (x2,z2) = location_in_view(x1-size_x/2,y1,z1)
+    (x3,z3) = location_in_view(x1+size_x/2,y1,z1+size_z)
+    return (abs(x3-x2), abs(z3-z2))
+
+def size_in_view2(x1,y1,z1, size_x, size_y):
+    """ 3D座標から2D上のサイズ算出 """
+#    az = 0
+    (x2,z2) = location_in_view(x1-size_x/2,y1-size_y/2,z1)
+    (x3,z3) = location_in_view(x1+size_x/2,y1+size_y/2,z1)
+    return (abs(x3-x2), abs(z3-z2))
+
+def draw_character(image, x,  y, z, width, height):
+    """ キャラクター描写 """
+    #影表示
+    if width < 300: #幅の狭いキャラクターのみ影表示
+        c, d = size_in_view2(x,y,0, width, width)
+        s_image = pygame.transform.scale(image_shadow, (c, d))
+        s_image.set_alpha(80)
+        a, b = location_in_view(x-width/2, y+width/2, 0)
+        SURFACE.blit(s_image, (a, b))
+
+    #キャラクター表示
+    c, d = size_in_view(x,y,z,width, height)
+#    if width >= 300 and width <= 350: #ロゴのみスムース縮小
+#        image = pygame.transform.smoothscale(image, (c, d))
+#    else:
+    image = pygame.transform.scale(image, (c, d))
+    a, b = location_in_view(x-width/2, y, z+height)
+    SURFACE.blit(image, (a, b))
+
+def location_in_view2(x1, y1, z1):
+    """ 3D座標から2D上の座標算出 """
+    #y1 = y1 + 10
+    y1 = y1 - adjust_y
+    if y1 <= 0 :
+        y1 = 0
+
+    z1 = z1 - 150
+
+    x2 = int((x1 + adjust_x * y1) / (y1/1000 + 1)) + 300
+    z2 = int((z1 + adjust_z * y1) / (y1/1000 + 1)) + 300
+    return (x2, z2)
+
 
 def draw_foreground(chara):
     #右のコート表示
@@ -327,9 +405,10 @@ def draw_foreground(chara):
         col=i.color
         pygame.draw.circle(SURFACE, col, pos, 10, width=0)
 
+    pygame.draw.rect(SURFACE, (254,254,254), (0, 600, 600, 900))
+#    pygame.draw.polygon(SURFACE, (189,104,86), ((0, b),(600,b),(600,600),(0,600)))
 
-
-def draw_background(adjust_x, adjust_y, adjust_z, counter):
+def draw_background():
     """ 背景描写 """
     line_data = [(-548.5,0,-543.5,2377),(-411.5,0,-406.5,2377),
                 (-2.5,548.5,2.5,1828.5),(543.5,0,548.5,2377),
@@ -338,12 +417,12 @@ def draw_background(adjust_x, adjust_y, adjust_z, counter):
                 (-411.5,548.5,411.5,553.5),(-2.5,0,2.5,20),
                 (-548.5,0,548.5,10)]
 
-    a, b = location_in_view2(0, 200,0, 0, 0, adjust_x, adjust_y, adjust_z) #遠景
+    a, b = location_in_view(0, 4000,0) #遠景
     SURFACE.blit(image_background,(a - 300, b - 320))
 
     #フィールドのサイズ
     x1,y1,x2,y2 = field_data
-    a, b = location_in_view(x2, y2 ,150, 0, 0, adjust_x, adjust_y, adjust_z) #地面
+    a, b = location_in_view(x2, y2 ,0) #地面
 
 #    pygame.draw.rect(SURFACE, (189,104,86), (0, b, 400, 10))
     pygame.draw.polygon(SURFACE, (189,104,86), ((0, b),(600,b),(600,600),(0,600)))
@@ -354,54 +433,35 @@ def draw_background(adjust_x, adjust_y, adjust_z, counter):
     x1,y1,x2,y2 = court_data
 
     pygame.draw.polygon(SURFACE,(0, 128, 0), #テニスコート
-                        (location_in_view(x1, y1, 150, 0, 0, adjust_x, adjust_y, adjust_z),
-                         location_in_view(x2, y1, 150, 0, 0, adjust_x, adjust_y, adjust_z),
-                         location_in_view(x2, y2, 150, 0, 0, adjust_x, adjust_y, adjust_z),
-                         location_in_view(x1, y2, 150, 0, 0, adjust_x, adjust_y, adjust_z)))
+                        (location_in_view(x1, y1, 0),
+                         location_in_view(x2, y1, 0),
+                         location_in_view(x2, y2, 0),
+                         location_in_view(x1, y2, 0)))
 
 
     for i in range(len(line_data)): #ライン
         x1,y1,x2,y2 = line_data[i]
         pygame.draw.polygon(SURFACE,(255, 255, 255), #ライン描画
-                        (location_in_view(x1, y1, 150, 0, 0, adjust_x, adjust_y, adjust_z),
-                         location_in_view(x2, y1, 150, 0, 0, adjust_x, adjust_y, adjust_z),
-                         location_in_view(x2, y2, 150, 0, 0, adjust_x, adjust_y, adjust_z),
-                         location_in_view(x1, y2, 150, 0, 0, adjust_x, adjust_y, adjust_z)))
+                        (location_in_view(x1, y1, 0),
+                         location_in_view(x2, y1, 0),
+                         location_in_view(x2, y2, 0),
+                         location_in_view(x1, y2, 0)))
 
-
-def draw_character(image, x,  y, z, width, height, adjust_x, adjust_y, adjust_z):
-    """ キャラクター描写 """
-    #影表示
-    if width < 300: #幅の狭いキャラクターのみ影表示
-        c, d = size_in_view(y, width, width,adjust_y)
-        s_image = pygame.transform.scale(image_shadow, (c, d))
-        s_image.set_alpha(80)
-        a, b = location_in_view(x, y, 147, width, width, adjust_x, adjust_y, adjust_z)
-        SURFACE.blit(s_image, (a, b))
-
-    #キャラクター表示
-    c, d = size_in_view(y, width, height,adjust_y)
-#    if width >= 300 and width <= 350: #ロゴのみスムース縮小
-#        image = pygame.transform.smoothscale(image, (c, d))
-#    else:
-    image = pygame.transform.scale(image, (c, d))
-    a, b = location_in_view(x, y, z, width, height, adjust_x, adjust_y, adjust_z)
-    SURFACE.blit(image, (a, b))
 
 def score_indication(seta,setb,gamea,gameb,pointa,pointb):
-    image = sysfont.render( #スコア
+    image = sysfont.render( #セット
         "Sets", True, (255, 255, 255))
     SURFACE.blit(image, (120, 2))
     image = sysfont.render(
         "{:0>5}-{:0>5}".format(seta,setb), True, (255, 255, 255))
     SURFACE.blit(image, (120, 17))
-    image = sysfont.render( #距離
+    image = sysfont.render( #ゲーム
         "Game", True, (255, 255, 255))
     SURFACE.blit(image, (230, 2))
     image = sysfont.render(
         "{:0>1}-{:0>1}".format(gamea,gameb), True, (255, 255, 255))
     SURFACE.blit(image, (230, 17))
-    image = sysfont.render( #ダメージ
+    image = sysfont.render( #ポイント
         "Points", True, (255, 255, 255)) #sysfontで"Damage"と表示,ならめらかにする、色
     SURFACE.blit(image, (322, 2))
     image = sysfont.render(
@@ -411,9 +471,8 @@ def score_indication(seta,setb,gamea,gameb,pointa,pointb):
 def main():
     """ メインルーチン """
     #変数初期設定(基本)
+    global adjust_x,adjust_y,adjust_z,mex,mey,mez
     a, b, c, d = 0, 0, 0, 0
-    round_data = [(50, 0, 0), (50, 0, 0), (0, 80, 0), (0, 70, 0), (50, 80, 0), (50, 70, 0), (10, 0, 0), (15, 0, 0), (0, 0, 100), (0, 0, 50),
-                  (0, 30, 0), (0, 30, 0), (30, 0, 50), (30, 0, 50), (50, 50, 50), (50, 50, 50), (30, 40, 0), (15, 40, 40), (15, 30, 30), (0, 0, 0)]
     character = [Character() for i in range(50)]
     character_copy = []
     counter = 0
@@ -430,9 +489,6 @@ def main():
         #変数初期設定(タイトル)
         a = 0
         title_y = 1500
-        adjust_x = 0
-        adjust_y = 0
-        adjust_z = 5
         gameover_flag = 3
         damage = 0
         counter_character = 1
@@ -451,11 +507,16 @@ def main():
 
         #自分を表示する
         character[0].on(0)
-        rate_stopper, rate_frog, rate_bird = round_data[0]
 
+        adjust_x = character[0].x /1000
+        adjust_y = character[0].y
+        adjust_z = 0.1+character[0].z /1000
+        mex = character[0].x
+        mey = character[0].y
+        mez = character[0].z
 
         #背景描写
-        draw_background(adjust_x, adjust_y, adjust_z, counter)
+        draw_background()
 
         #相手プレーヤー表示オン1
         character[counter_character].on(4)
@@ -484,7 +545,7 @@ def main():
         for i in range(1, len(character_copy)):
             if character_copy[i].status > 0:
                 draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,
-                               character_copy[i].width, character_copy[i].height, adjust_x, adjust_y,adjust_z)
+                               character_copy[i].width, character_copy[i].height)
 
         #スコア表示
         score_indication(seta,setb,gamea,gameb,pointa,pointb)
@@ -526,8 +587,8 @@ def main():
 
             #タイトル3D表示
             title_y -= 50 if title_y > 0 else 0
-            draw_character(image_title, 0, title_y,-52,  350, 103, adjust_x, adjust_y, adjust_z)
-            draw_character(image_start, 0, title_y, 52,  300, 35, adjust_x, adjust_y, adjust_z)
+            draw_character(image_title, 0, title_y,-52,  350, 103 )
+            draw_character(image_start, 0, title_y, 52,  300, 35)
 
             if doubles == 1:
                 chara=(character[0],character[1],character[4],character[5])
@@ -559,9 +620,6 @@ def main():
         while gameover_flag == 0:
 
             #ラウンドデータ読み込み
-            if counter % 300 == 0 and counter < 6000:
-                    rate_stopper, rate_frog, rate_bird = round_data[int(counter/300)]
-
             #カウンター
             if character[0].status < 200 and counter < 6000:
                 counter += 1
@@ -594,18 +652,22 @@ def main():
                 if pressed[K_SPACE] and character[0].jump_status == 1:
                     sound_jump.play()
                     character[0].jump_status = 2
-                    character[0].vz = -26
+                    character[0].vz = +26
             if character[0].jump_status == 2:
                 character[0].z += character[0].vz
-                character[0].vz += 2
-                if character[0].z >= 70:
-                    character[0].z = 70
+                character[0].vz -= 2
+                if character[0].z <= 0:
+                    character[0].z = 0
                     character[0].jump_status = 1
             #adjust_x = character[0].x / 30
             #adjust_z = character[0].z / 20
-            adjust_x = character[0].x /30
+            adjust_x = character[0].x /1000
             adjust_y = character[0].y
-            adjust_z = character[0].z /20
+            adjust_z = 0.1+character[0].z /1000
+            mex = character[0].x
+            mey = character[0].y
+            mez = character[0].z
+
             if counter > 5970:
                 if character[0].x > 0:
                     character[0].x -= 10
@@ -630,7 +692,7 @@ def main():
                         counter_character = 1
 
             #背景描写
-            draw_background(adjust_x, adjust_y,adjust_z, counter)
+            draw_background()
 
             #キャラクター移動
             if character[0].status < 200 and counter < 6000:
@@ -679,13 +741,12 @@ def main():
             #キャラクター描写
             for i in range(len(character_copy)):
                 if character_copy[i].status > 0:
-                    draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,
-                                   character_copy[i].width, character_copy[i].height, adjust_x, adjust_y, adjust_z)
+                    draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,character_copy[i].width, character_copy[i].height)
 
             #ポイント表示
             if counter_point > 0:
                 counter_point += 1
-                a, b = location_in_view2(point_x, 0,100, 0, 0, adjust_x, adjust_y, adjust_z)
+                a, b = location_in_view(point_x, character[0].y,0)
                 image = sysfont.render(
                     "{:^10}".format("1000 x " + str(combo)), True, (255, 0, 0))
                 SURFACE.blit(image, (a, b))
@@ -693,11 +754,6 @@ def main():
                     counter_point = 0
 
             #スコア表示
-
-
-            seta =character[0].y
-            setb = 900-character[0].y/4-612/4
-
             score_indication(seta,setb,gamea,gameb,pointa,pointb)
 
             #右のコート表示
