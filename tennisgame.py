@@ -93,6 +93,10 @@ class Character:
         self.image_omusubi = pygame.image.load("omusubi.gif")
         self.image_trophy = pygame.image.load("trophy.png")
 
+    #表示オフ
+    def off(self):
+        self.status = 0
+
     #表示オン
     def on(self, image_type):
         self.status = 1
@@ -126,7 +130,7 @@ class Character:
             self.vx = 0
             self.vy = 0
             self.vz = 0
-            self.width = 411.5+411.5+91.4+91.4
+            self.width = 548+548+91.4+91.4
             self.height = 91.4
             self.image = self.image_net
         if self.image_type == 3: #ボール
@@ -163,6 +167,18 @@ class Character:
             self.height = 100
             self.color =(255,0,0)
             self.image = self.image_man4
+        if self.image_type == 8: #ボールパーソン(織姫、舞子)兼ラウンドガール
+            self.x = 200
+            self.y = servieline2-200
+            self.z = 0
+            self.vx = 0
+            self.vy = -2
+            self.vz = (random.randint(0, 1) * 2 - 1) * 5
+            self.width = 100
+            self.height = 100
+            self.color =(255,0,0)
+            self.image = self.image_man4
+
         if self.image_type == 10: #おむすび
             self.x = random.randint(-500, 500)
             self.y = baseline2
@@ -200,53 +216,6 @@ class Character:
                 self.vz = -self.vz *0.1
                 self.z = 0
 
-        elif self.image_type == 3: #ボール
-            self.status += 1
-            self.x += self.vx
-            selfy_old = self.y
-            self.y += self.vy
-            self.z += self.vz
-            self.vz -= 1
-            self.vy = self.vy * 0.98
-            if self.z < 0 :
-                self.vz = -self.vz *0.7
-                self.z = 0
-            if (self.y < y and self.vy < 0):
-                self.vy = 80
-                self.vz = +20
-            if (self.y > baseline2 and self.vy > 0):
-                self.vy = -80
-                self.vz = +20
-#            if self.y  character[1].y and self.vz > 0
-#                self.vz = -80
-#                self.vz = -20
-        elif (self.image_type == 4 or self.image_type == 5): #相手プレーヤー
-            self.x += self.vx
-            selfy_old = self.y
-            self.y += self.vy
-            self.z += self.vz
-            if self.x > x:
-                self.vx -= 1
-            elif self.x < x:
-                self.vx += 1
-            if (self.x >= 300 and self.vx > 0) or (self.x <= 10 and self.vx < 0):
-                self.vx = int(self.vx / 2)
-            if (self.x >= 10 and self.vx > 0) or (self.x <= -300 and self.vx < 0):
-                self.vx = int(self.vx / 2)
-
-            if self.z > +110:
-                self.z = +110
-                self.vz = -self.vz
-            elif self.z < 0:
-                self.z = 0
-                self.vz = -self.vz
-            if self.y <= netline + 10 and self.vy < 0 :
-                self.vy = -self.vy
-                self.y = netline + 10
-            if self.y >= baseline2 and self.vy > 0:
-                self.vy = -self.vy
-                self.y = baseline2
-
         #スクリーンより前面(y < 0)の場合には消去
         if self.y < fieldy1 - 20:
             self.status = 0
@@ -266,8 +235,50 @@ class Character:
         else:
             return(0, self.x)
 
+    def moveball(self,checkcort):#ボールの移動
+        cx1,cy1,cx2,cy2 = checkcort #このボールのワンバンドすべきコート
+        #ボールの中心点で判断するので+3.35広げてある。
+        if self.z + slef.vz >0: #ボールがz=0を通過していない時
+            self.x += self.vx
+            selfy_old = self.y
+            self.y += self.vy
+            self.z += self.vz
+            self.vz -= 1
+            self.vy = self.vy * 0.98
+        else:   #ワンバウンド
+            #着地点を判断するため、x,yはz=0を通過する点に
+            self.x += self.vx * self.z/(-self.vz) #self.vzがマイナスなので
+            self.y += self.y - self.vy * self.z/(-self.vz)
+
+            self.vz = -self.vz *0.7
+            self.z = 0
+            if self.status == 3:
+                self.status = 5
+                return(5)   #打ったプレーヤーのポイント
+            elif self.status == 2:
+                if(self.x < cx1 or self.x > cx2 or self.y < cy1 or self.y > cy2):
+                    self.status = 4
+                    return(4)   #打ったプレーヤーのミス
+                else:
+                    self.status = 3
+                                #インプレー続行
+        return(self.status)
+
+        #フィールドの外の場合には消去
+        if self.y < fieldy1 - 20 or self.y > fieldy2 or self.x < fieldx1 or self.x > fieldx2:
+            if self.status == 2:
+                self.status = 0
+                return(4)   #打ったプレーヤーのミス
+            else if:
+                self.status = 0
+                return(5)   #打ったプレーヤーのポイント
+        else :
+            return(self.status)
+
+
+
     #得点
-    def finish(self):
+    def success(self):
         if self.image_type == 0:
             self.image = self.image_man_smile
     #失点
@@ -291,6 +302,10 @@ class Character:
                 self.status = 1
                 self.image = self.image_man
 
+    #勝利
+    def finish(self):
+        if self.image_type == 0:
+            self.image = self.image_man_smile
 
 
 def location_in_view(x1, y1, z1):
@@ -414,7 +429,7 @@ def score_indication(gamea,gameb,pointa,pointb):
         "Sets", True, (255, 255, 255))
     SURFACE.blit(image, (120, 2))
     image = sysfont.render(
-        "{:0>1}-{:0>1}".format(seta,setb), True, (255, 255, 255))
+        "{:0>5}-{:0>5}".format(seta,setb), True, (255, 255, 255))
     SURFACE.blit(image, (120, 17))
     image = sysfont.render( #ゲーム
         "Game", True, (255, 255, 255))
@@ -436,13 +451,13 @@ def main():
     global mex,mey,mez
     global seta,setb
     a, b, c, d = 0, 0, 0, 0
-    character = [Character() for i in range(7)]
+    character = [Character() for i in range(9)]
     character_copy = []
     counter = 0
     score = 0
     point_x = 0
     fullscreen_flag = 0
-    doubles = 0
+    doubles = 1
 
     #マウスカーソル非表示
     pygame.mouse.set_visible(False)
@@ -478,25 +493,23 @@ def main():
         #背景描写
         draw_background()
 
-        #相手プレーヤー表示オン　counter=1
+        #相手プレーヤー表示オン
         character[1].on(4)
 
-
-        #ボール表示オンcounter=2
+        #ボール表示オン
         character[2].on(3)
 
-        #ネット表示オンcounter=3
+        #ネット表示オン
         character[3].on(2)
-        if doubles == 1:
-            character[3].width =  548+548+91.4+91.4
 
-        #ペア表示オンcounter=4
+        #ペア表示オン
         if doubles == 1:
             character[4].on(1)
 
-        #相手プレーヤー2表示オンcounter=5
+        #相手プレーヤー2表示オン
         if doubles == 1 :
             character[5].on(5)
+
 
         #キャラクター初期描写
         character_copy = character
@@ -598,7 +611,7 @@ def main():
                     else:
                         screen = pygame.display.set_mode((400, 300), 0)
 
-            #キー入力判定＆とび職人移動
+            #キー入力判定＆テニスプレーヤー移動
             if character[0].status < 200 and counter <= 5970:
                 pressed = pygame.key.get_pressed()
                 if pressed[K_LEFT] and character[0].x > fieldxl+50:
@@ -642,7 +655,7 @@ def main():
                     if character[6].status == 0:
                         character[6].on(10)
 
-                #勝利表示オン
+                #ゲームセット表示オン
                 if counter == 5802:
                     character[7].on(20)
 
@@ -651,6 +664,9 @@ def main():
 
             #キャラクター移動
             if character[0].status < 200 and counter < 6000:
+                moveme()
+                movehe()
+                character
                 for i in range(1, len(character)):
                     if character[i].status > 0:
                         a, b = character[i].move(character[0].x, character[0].y, character[0].z, character[0].status)
