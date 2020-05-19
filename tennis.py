@@ -36,7 +36,7 @@ mez = 0
 #イメージ設定
 image_court = pygame.image.load("court.png")
 
-image_background = pygame.image.load("background.jpg")
+image_background = pygame.image.load("background1.png")
 image_title = pygame.image.load("title.png")
 image_start = pygame.image.load("start.png")
 image_final_bonus = pygame.image.load("final_bonus.png")
