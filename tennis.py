@@ -42,6 +42,7 @@ image_start = pygame.image.load("start.png")
 image_final_bonus = pygame.image.load("final_bonus.png")
 image_gameover = pygame.image.load("gameover.png")
 image_shadow = pygame.image.load("shadow.gif")
+image_board = pygame.image.load("board.png")
 
 #効果音
 sound_frog_jump = pygame.mixer.Sound("frog_jump.wav")
@@ -266,6 +267,44 @@ class Character:
         else:
             return(0, self.x)
 
+
+    def moveball(self,checkcort):#ボールの移動
+        #時速はMAX150km(早いプロ)
+        #90km/h
+        #初心者60km/h
+        #重力加速度9.8m/s/s
+        #xv,yv,zv共1=30cm/s=0.3m/s=1.08km/h
+        #20=600cm/s=6m/s=3.6*6=21.6km/h
+        #100=3000cm/s=30m/S=108km/h
+        cx1,cy1,cx2,cy2 = checkcort #このボールのワンバンドすべきコート
+        #ボールの中心点で判断するので+3.35広げてある。
+        if self.z + slef.vz >0: #ボールがz=0を通過していない時
+            self.x += self.vx
+            selfy_old = self.y
+            self.y += self.vy
+            self.z += self.vz
+            self.vz -= 1
+            self.vy = self.vy * 0.98
+        else:   #ワンバウンド
+            #着地点を判断するため、x,yはz=0を通過する点に
+            self.x += self.vx * self.z/(-self.vz) #self.vzがマイナスなので
+            self.y += self.y - self.vy * self.z/(-self.vz)
+
+            self.vz = -self.vz *0.7
+            self.z = 0
+            if self.status == 3:
+                self.status = 5
+                return(5)   #打ったプレーヤーのポイント
+            elif self.status == 2:
+                if(self.x < cx1 or self.x > cx2 or self.y < cy1 or self.y > cy2):
+                    self.status = 4
+                    return(4)   #打ったプレーヤーのミス
+                else:
+                    self.status = 3
+                                #インプレー続行
+        return(self.status)
+
+
     #得点
     def finish(self):
         if self.image_type == 0:
@@ -291,8 +330,6 @@ class Character:
                 self.status = 1
                 self.image = self.image_man
 
-
-
 def location_in_view(x1, y1, z1):
     """ 3D座標から2D上の座標算出 """
     #ピンホールカメラの原理で表示
@@ -305,7 +342,7 @@ def location_in_view(x1, y1, z1):
     adj_x = mex/2000 #見る角度　tanθで表現
     adj_z = mez/1000
 
-    #フイルムの位置レンズの -1000
+    #フイルムの位置。レンズの -1000
     yf = 1000
 
     x1 = x1 - xl
@@ -323,7 +360,6 @@ def location_in_view(x1, y1, z1):
     x3 = (x2) + 300
     z3 = int(600-zl - (z2)*2)
     return (x3, z3)
-
 
 def size_in_view(x1,y1,z1, size_x, size_z):
     """ 3D座標から2D上のサイズ算出 """
@@ -370,8 +406,9 @@ def draw_foreground(chara):
     #コントロール領域を白く表示。(開発中)
     pygame.draw.rect(SURFACE, (254,254,254), (0, 600, 600, 900))
 
-def draw_background():
+def draw_background(stage):
     """ 背景描写 """
+    global seta,setb,gamea,gameb,pointa,pointb
     #テニスコートのラインのデータ。
     line_data = [(-548.5,0,-543.5,2377),(-411.5,0,-406.5,2377),
                 (-2.5,548.5,2.5,1828.5),(543.5,0,548.5,2377),
@@ -406,35 +443,35 @@ def draw_background():
                          location_in_view(x2, y1, 0),
                          location_in_view(x2, y2, 0),
                          location_in_view(x1, y2, 0)))
+    if stage == 0:
+        SURFACE.blit(image_board,(0,0))
+    else :
+        #スコアーを表示する。
+        image = sysfont.render( #セット
+            "Sets", True, (255, 255, 255))
+        SURFACE.blit(image, (120, 2))
+        image = sysfont.render(
+            "{:0>1}-{:0>1}".format(seta,setb), True, (255, 255, 255))
+        SURFACE.blit(image, (125, 17))
+        image = sysfont.render( #ゲーム
+            "Game", True, (255, 255, 255))
+        SURFACE.blit(image, (230, 2))
+        image = sysfont.render(
+            "{:0>2}-{:0>2}".format(gamea,gameb), True, (255, 255, 255))
+        SURFACE.blit(image, (235, 17))
+        image = sysfont.render( #ポイント
+            "Points", True, (255, 255, 255))
 
-
-def score_indication(gamea,gameb,pointa,pointb):
-    #スコアーを表示する。
-    image = sysfont.render( #セット
-        "Sets", True, (255, 255, 255))
-    SURFACE.blit(image, (120, 2))
-    image = sysfont.render(
-        "{:0>1}-{:0>1}".format(seta,setb), True, (255, 255, 255))
-    SURFACE.blit(image, (120, 17))
-    image = sysfont.render( #ゲーム
-        "Game", True, (255, 255, 255))
-    SURFACE.blit(image, (230, 2))
-    image = sysfont.render(
-        "{:0>1}-{:0>1}".format(gamea,gameb), True, (255, 255, 255))
-    SURFACE.blit(image, (230, 17))
-    image = sysfont.render( #ポイント
-        "Points", True, (255, 255, 255))
-
-    SURFACE.blit(image, (322, 2))
-    image = sysfont.render(
-        "{:>2}-{:>2}".format(pointa,pointb), True, (255, 255, 255))
-    SURFACE.blit(image, (322, 17))
+        SURFACE.blit(image, (320, 2))
+        image = sysfont.render(
+            "{:>2}-{:>2}".format(pointa,pointb), True, (255, 255, 255))
+        SURFACE.blit(image, (325, 17))
 
 def main():
     """ メインルーチン """
     #変数初期設定(基本)
     global mex,mey,mez
-    global seta,setb
+    global seta,setb,pointa,pointb,gamea,gameb
     a, b, c, d = 0, 0, 0, 0
     character = [Character() for i in range(7)]
     character_copy = []
@@ -445,7 +482,7 @@ def main():
     doubles = 0
 
     #マウスカーソル非表示
-    pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(True)
 
     while True:
 
@@ -456,10 +493,10 @@ def main():
         damage = 0
         counter_point = 0
         combo = 0
-        seta = 0
-        setb = 0
-        gamea = 0
-        gameb = 0
+        seta = 2
+        setb = 2
+        gamea = 10
+        gameb = 10
         pointa = 0
         pointb = 0
 
@@ -476,7 +513,7 @@ def main():
         mez = character[0].z
 
         #背景描写
-        draw_background()
+        draw_background(0)
 
         #相手プレーヤー表示オン　counter=1
         character[1].on(4)
@@ -507,9 +544,6 @@ def main():
                 draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,
                                character_copy[i].width, character_copy[i].height)
 
-        #スコア表示
-        score_indication(gamea,gameb,pointa,pointb)
-
         #クレジット表示
         image = sysfont.render(
             "© 2020 KAZUOU", True, (255, 255, 255))
@@ -530,9 +564,9 @@ def main():
                     #F11でフルスクリーンモードへの切り替え
                     fullscreen_flag = not fullscreen_flag
                     if fullscreen_flag:
-                        screen = pygame.display.set_mode((400, 300), FULLSCREEN)
+                        screen = pygame.display.set_mode((1200, 900), FULLSCREEN)
                     else:
-                        screen = pygame.display.set_mode((400, 300), 0)
+                        screen = pygame.display.set_mode((1200, 900), 0)
 
             #キー入力判定
             pressed = pygame.key.get_pressed()
@@ -564,8 +598,8 @@ def main():
         #変数初期設定(ゲーム)
         seta = 2
         setb = 2
-        gamea = 3
-        gameb = 3
+        gamea = 10
+        gameb = 10
         pointa = 0
         pointb = 0
         score = 0
@@ -594,9 +628,9 @@ def main():
                     #F11でフルスクリーンモードへの切り替え
                     fullscreen_flag = not fullscreen_flag
                     if fullscreen_flag:
-                        screen = pygame.display.set_mode((400, 300), FULLSCREEN)
+                        screen = pygame.display.set_mode((1200, 900), FULLSCREEN)
                     else:
-                        screen = pygame.display.set_mode((400, 300), 0)
+                        screen = pygame.display.set_mode((1200, 900), 0)
 
             #キー入力判定＆とび職人移動
             if character[0].status < 200 and counter <= 5970:
@@ -647,7 +681,7 @@ def main():
                     character[7].on(20)
 
             #背景描写
-            draw_background()
+            draw_background(1)
 
             #キャラクター移動
             if character[0].status < 200 and counter < 6000:
@@ -708,8 +742,6 @@ def main():
                 if counter_point > 30:
                     counter_point = 0
 
-            #スコア表示
-            score_indication(gamea,gameb,pointa,pointb)
 
             #右のコート表示
             if doubles == 1:
@@ -764,9 +796,9 @@ def main():
                     #F11でフルスクリーンモードへの切り替え
                     fullscreen_flag = not fullscreen_flag
                     if fullscreen_flag:
-                        screen = pygame.display.set_mode((400, 300), FULLSCREEN)
+                        screen = pygame.display.set_mode((1200, 900), FULLSCREEN)
                     else:
-                        screen = pygame.display.set_mode((400, 300), 0)
+                        screen = pygame.display.set_mode((1200, 900), 0)
 
             #キー入力判定
             pressed = pygame.key.get_pressed()
