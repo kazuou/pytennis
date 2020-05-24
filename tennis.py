@@ -11,7 +11,7 @@ print(os.getcwd())
 pygame.init()
 pygame.key.set_repeat(5, 5)
 #SURFACE = pygame.display.set_mode((1200, 600))
-SURFACE = pygame.display.set_mode((600+600, 300+600)) #1000x900
+SURFACE = pygame.display.set_mode((600+600, 300+600)) #1000x900 1366x768
 FPSCLOCK = pygame.time.Clock()
 pygame.display.set_caption("AI Tennis")
 sysfont = pygame.font.SysFont(None, 24)
@@ -56,6 +56,7 @@ image_final_bonus = pygame.image.load("final_bonus.png")
 image_gameover = pygame.image.load("gameover.png")
 image_shadow = pygame.image.load("shadow.gif")
 image_board = pygame.image.load("board.png")
+image_man1 = pygame.image.load("man1.png")
 
 #効果音
 sound_frog_jump = pygame.mixer.Sound("frog_jump.wav")
@@ -97,15 +98,20 @@ class Character:
         self.height = 0
         self.mag = 1 #サイズと表示の倍率(ボールを大きく見せるため)
         self.color = (255,255,255)
-        self.image_man = pygame.image.load("man.png")
-        self.image_man2 = pygame.image.load("man.png")
+        self.image_man_bright = pygame.image.load("man1_1.png")
+        self.image_man_failed = pygame.image.load("man1_1.png")
+        self.image_man_smile = pygame.image.load("man1_1.png")
+
+        self.image_man1_1 = pygame.image.load("man1_1.png")
+        self.image_man1 = pygame.image.load("man1.png")
+        self.image_man2 = pygame.image.load("man1.png")
         self.image_man3 = pygame.image.load("man3.png")
         self.image_man4 = pygame.image.load("man4.png")
         self.image_ball = pygame.image.load("TennisBall.png")
 
         self.image_net = pygame.image.load("net.png")
         self.image_omusubi = pygame.image.load("omusubi.gif")
-        self.image_trophy = pygame.image.load("trophy.png")
+        self.image_nipponichi = pygame.image.load("nipponichi.png")
 
     #表示オン
     def on(self, image_type):
@@ -121,7 +127,7 @@ class Character:
             self.vz = 0
             self.width = 100
             self.height = 170
-            self.image = self.image_man
+            self.image = self.image_man1_1
         if self.image_type == 1: #ペア
             self.x = -200
             self.y = servieline1
@@ -132,7 +138,7 @@ class Character:
             self.color = (0,0,0)
             self.width = 100
             self.height = 170
-            self.image = self.image_man
+            self.image = self.image_man1
         if self.image_type == 2: #ネット
             self.x = 0
             self.y = netline
@@ -196,7 +202,7 @@ class Character:
             self.vz = 0
             self.width = 360
             self.height = 310
-            self.image = self.image_omusubi
+            self.image = self.image_nipponichi
 
     #移動
     def move(self, x, y, z, status):
@@ -486,7 +492,7 @@ def main():
     global mex,mey,mez
     global seta,setb,pointa,pointb,gamea,gameb
     a, b, c, d = 0, 0, 0, 0
-    character = [Character() for i in range(7)]
+    character = [Character() for i in range(8)]
     character_copy = []
     counter = 0
     score = 0
@@ -622,6 +628,7 @@ def main():
         #BGM再生
         pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play()
+        character[0].image=image_man1
 
         #ループ2(ゲームメインループ)
         while game_flag == 0:
@@ -775,9 +782,9 @@ def main():
 
         #仕事場到着またはゲームオーバー表示
         if game_flag == 1:
-            SURFACE.blit(image_final_bonus, (25, 70))
+            SURFACE.blit(image_final_bonus, (125, 70))
         else:
-            SURFACE.blit(image_gameover, (50, 129))
+            SURFACE.blit(image_gameover, (150, 129))
 
         #画面コピー
         filler = SURFACE.copy()
