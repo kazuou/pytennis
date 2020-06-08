@@ -56,7 +56,7 @@ class Character:
         self.image_nipponichi = pygame.image.load("nipponichi.png")
 
     #表示オン
-    def on(self, image_type):
+    def on(self, image_type,game_flag):
         self.status = 1
         self.image_type = image_type
         if self.image_type == 0: #私
