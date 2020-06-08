@@ -33,27 +33,20 @@ class Character:
         self.vx = 0
         self.vy = 0
         self.vz = 0
-        self.rotx = 0
+        self.rotx = 0   #回転　ボールのみ
         self.roty = 0
         self.rotz = 0
+        self.dx = 0     #目的地
+        self.dy = 0
+        self.dz = 0
+        self.shotgear=50
+        self.movegear=50
         self.width = 0
         self.height = 0
         self.mag = 1 #サイズと表示の倍率(ボールを大きく見せるため)
         self.color = (255,255,255)
-        self.image_man_bright = pygame.image.load("man1_1.png")
-        self.image_man_failed = pygame.image.load("man1_1.png")
-        self.image_man_smile = pygame.image.load("man1_1.png")
+        self.image = image_man1
 
-        self.image_man1_1 = pygame.image.load("man1_1.png")
-        self.image_man1 = pygame.image.load("man1.png")
-        self.image_man2 = pygame.image.load("man1.png")
-        self.image_man3 = pygame.image.load("man3.png")
-        self.image_man4 = pygame.image.load("man4.png")
-        self.image_ball = pygame.image.load("TennisBall.png")
-
-        self.image_net = pygame.image.load("net.png")
-        self.image_omusubi = pygame.image.load("omusubi.gif")
-        self.image_nipponichi = pygame.image.load("nipponichi.png")
 
     #表示オン
     def on(self, image_type,game_flag):
@@ -177,22 +170,8 @@ class Character:
         self.status = 0
 
     #移動
-    def move(self, x, y, z, status):
-        if self.image_type == 20 : #トロファ
-            selfy_old = self.y
-            self.y += self.vy
-            self.z += self.vz
-
-        elif self.image_type == 10: #おむすび
-            selfy_old = self.y
-            self.y += self.vy
-            self.z += self.vz
-            self.vz -= 1
-            if self.z < 0 :
-                self.vy = -20
-                self.vz = -self.vz *0.1
-                self.z = 0
-        elif self.image_type == 11 : #オープニングメッセージ1
+    def move_opening(self):
+        if self.image_type == 11 : #オープニングメッセージ1
             selfy_old = self.y
             self.y += self.vy
             if self.y < 0:
@@ -204,27 +183,6 @@ class Character:
             if self.y < 0:
                 self.vy = 0
                 self.y = 0
-
-        elif self.image_type == 3: #ボール
-            self.status += 1
-            self.x += self.vx
-            selfy_old = self.y
-            self.y += self.vy
-            self.z += self.vz
-            self.vz -= 1
-            self.vy = self.vy * 0.98
-            if self.z < 0 :
-                self.vz = -self.vz *0.7
-                self.z = 0
-            if (self.y < y and self.vy < 0):
-                self.vy = 80
-                self.vz = +20
-            if (self.y > draw.baseline2 and self.vy > 0):
-                self.vy = -80
-                self.vz = +20
-#            if self.y  character[1].y and self.vz > 0
-#                self.vz = -80
-#                self.vz = -20
         elif (self.image_type == 4 or self.image_type == 5): #相手プレーヤー
             self.x += self.vx
             selfy_old = self.y
@@ -251,7 +209,41 @@ class Character:
             if self.y >= draw.baseline2 and self.vy > 0:
                 self.vy = -self.vy
                 self.y = draw.baseline2
+        else if self.image_type == 3: #ボール
+            self.status += 1
+            self.x += self.vx
+            selfy_old = self.y
+            self.y += self.vy
+            self.z += self.vz
+            self.vz -= 1
+            self.vy = self.vy * 0.98
+            if self.z < 0 :
+                self.vz = -self.vz *0.7
+                self.z = 0
+            if (self.y < y and self.vy < 0):
+                self.vy = 80
+                self.vz = +20
+            if (self.y > draw.baseline2 and self.vy > 0):
+                self.vy = -80
+                self.vz = +20
+#            if self.y  character[1].y and self.vz > 0
+#                self.vz = -80
+#                self.vz = -20
 
+    def move_play(self):
+        if self.image_type == 1:
+            pass
+
+    def move_pointend(self,state):
+        if self.image_type == 10: #おむすび
+            selfy_old = self.y
+            self.y += self.vy
+            self.z += self.vz
+            self.vz -= 1
+            if self.z < 0 :
+                self.vy = -20
+                self.vz = -self.vz *0.1
+                self.z = 0
         #スクリーンより前面(y < 0)の場合には消去
         if self.y < draw.fieldy1 - 20:
             self.status = 0
@@ -270,6 +262,23 @@ class Character:
                 return(0, self.x)
         else:
             return(0, self.x)
+
+
+    def move_ending(self,state):
+        if self.image_type == 20 : #トロファ
+            selfy_old = self.y
+            self.y += self.vy
+            self.z += self.vz
+
+
+
+    def move(self, x, y, z, status):
+
+
+
+
+
+
 
 
     def moveball(self,checkcort):#ボールの移動
