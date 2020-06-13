@@ -6,10 +6,10 @@ import tennischaracter as tc
 import draw
 import pygame
 
-image_final_bonus = pygame.image.load("final_bonus.png")
-image_gameover = pygame.image.load("gameover.png")
+image_final_bonus = pygame.image.load("images/final_bonus.png")
+image_gameover = pygame.image.load("images/gameover.png")
 
-sound_finish = pygame.mixer.Sound("finish.wav")
+sound_finish = pygame.mixer.Sound("media/finish.wav")
 sound_finish.set_volume(0.6)
 
 #ゲームセット

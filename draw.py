@@ -1,6 +1,8 @@
 """ draw.py """
 
 import pygame
+import tennischaracter as tc
+from pygame.locals import *
 
 
 
@@ -15,12 +17,12 @@ FPSCLOCK = pygame.time.Clock()
 pygame.display.set_caption("AI Tennis")
 sysfont = pygame.font.SysFont(None, 24)
 
-image_background = pygame.image.load("background1.png")
-image_shadow = pygame.image.load("shadow.gif")
-image_court = pygame.image.load("court.png")
-image_board = pygame.image.load("board.png")
-image_title = pygame.image.load("title.png")
-image_start = pygame.image.load("start.png")
+image_background = pygame.image.load("images/background1.png")
+image_shadow = pygame.image.load("images/shadow.gif")
+image_court = pygame.image.load("images/court.png")
+image_board = pygame.image.load("images/board.png")
+image_title = pygame.image.load("images/title.png")
+image_start = pygame.image.load("images/start.png")
 
 fieldxl=-548.5-652
 fieldxr=548.5+652
@@ -34,6 +36,8 @@ servieline1 = 548.5
 netline=1188.5
 field_data = (fieldxl,fieldy1,fieldxr,fieldy2)
 court_data = (-548.5,0,543.5,2377)
+
+game_flag = 0
 
 
 
@@ -200,7 +204,7 @@ def draw_all():
 
     for i in range(len(character_copy)):
         if character_copy[i].status > 0:
-            draw.draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,
+            draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,
                            character_copy[i].width, character_copy[i].height)
 
     drow_credit()

@@ -9,20 +9,18 @@ from pygame.locals import *
 
 import tennischaracter as tc
 import opening
+import playgame
+import gameset
 import draw
 
 print(os.getcwd())
 #SURFACE = pygame.display.set_mode((1200, 600))
 
 
-#イメージ設定
-
-image_man1 = pygame.image.load("man1.png")
-
 
 
 #BGM
-pygame.mixer.music.load("bgm.wav")
+pygame.mixer.music.load("media/bgm.wav")
 
 def main():
     """ メインルーチン """
@@ -36,7 +34,6 @@ def main():
     pygame.mouse.set_visible(True)
 
     while True:
-
         opening.opening()
 
         playgame.playgame()

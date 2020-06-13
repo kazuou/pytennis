@@ -63,7 +63,6 @@ def opening():
     #オープニング表示
     draw.game_flag = 10
 
-
     #ループ1(タイトル画面)
     while draw.game_flag == 10:
 
@@ -72,7 +71,7 @@ def opening():
         #キャラクターの移動
         for i in range(1, len(tc.character)):
             if tc.character[i].status > 0:
-                tc.character[i].move(tc.character[0].x, tc.character[0].y, tc.character[0].z, tc.character[0].status)
+                tc.character[i].move_opening()
 
 
         draw.draw_all()

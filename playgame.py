@@ -1,10 +1,10 @@
 """ playgame.py """
 
-from pygame.locals import *
 
 import tennischaracter as tc
 import draw
 import pygame
+from pygame.locals import *
 
 #判定範囲(この中にボールの中心がきていればOK。3.3cm大きくしている)
 judge_s1d=(-414.8,1831.8,5.8,1188.5)
@@ -19,21 +19,22 @@ judge_s1=(-414.8,2380.3,414.8,1188.5)
 judge_s2=(-414.8,1188.5,414.8,-3.3)
 #効果音
 
-sound_jump = pygame.mixer.Sound("jump.wav")
+sound_jump = pygame.mixer.Sound("media/jump.wav")
 sound_jump.set_volume(0.25)
-sound_eat = pygame.mixer.Sound("eat.wav")
+sound_eat = pygame.mixer.Sound("media/eat.wav")
 sound_eat.set_volume(0.3)
-sound_omusubi = pygame.mixer.Sound("omusubi.wav")
+sound_omusubi = pygame.mixer.Sound("media/omusubi.wav")
 sound_omusubi.set_volume(0.6)
 
-sound_crash = pygame.mixer.Sound("crash.wav")
+sound_crash = pygame.mixer.Sound("media/crash.wav")
 sound_crash.set_volume(0.4)
-sound_miss = pygame.mixer.Sound("miss.wav")
+sound_miss = pygame.mixer.Sound("media/miss.wav")
 sound_miss.set_volume(0.6)
 
 #変数初期設定(タイトル)
 def playgame():
     #変数初期設定(ゲーム)
+    print("start playgame")
     tc.seta = 2
     tc.setb = 2
     tc.gamea = 10
@@ -47,7 +48,7 @@ def playgame():
     #BGM再生
     pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play()
-    character[0].image=image_man1
+    tc.character[0].image=tc.image_man1
 
     #ループ2(ゲームメインループ)
     while draw.game_flag < 10:
@@ -136,8 +137,6 @@ def playgame():
 
 
         draw.draw_all()
-
-
 
         #BGM再生確認&リピート
         if pygame.mixer.music.get_busy() == 0:

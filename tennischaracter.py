@@ -21,6 +21,16 @@ gameb = 10
 pointa = 0
 pointb = 0
 
+image_man1 = pygame.image.load("images/man1.png")
+image_man1_1 = pygame.image.load("images/man1.png")
+image_man3 = pygame.image.load("images/man3.png")
+image_man4 = pygame.image.load("images/man4.png")
+
+
+image_net = pygame.image.load("images/net.png")
+image_ball = pygame.image.load("images/TennisBall.png")
+image_omusubi= pygame.image.load("images/omusubi.gif")
+
 class Character:
     """キャラクターーオブジェクト"""
     def __init__(self):
@@ -47,9 +57,8 @@ class Character:
         self.color = (255,255,255)
         self.image = image_man1
 
-
     #表示オン
-    def on(self, image_type,game_flag):
+    def on(self, image_type,game_flag=0):
         self.status = 1
         self.image_type = image_type
         if self.image_type == 0: #私
@@ -62,7 +71,7 @@ class Character:
             self.vz = 0
             self.width = 100
             self.height = 170
-            self.image = self.image_man1_1
+            self.image = image_man1_1
         if self.image_type == 1: #ペア
             self.x = -200
             self.y = draw.servieline1
@@ -73,7 +82,7 @@ class Character:
             self.color = (0,0,0)
             self.width = 100
             self.height = 170
-            self.image = self.image_man1
+            self.image = image_man1
         if self.image_type == 2: #ネット
             self.x = 0
             self.y = draw.netline
@@ -81,7 +90,7 @@ class Character:
             self.vx = 0
             self.vy = 0
             self.vz = 0
-            if tc.doubles == 0:
+            if doubles == 0:
                 #シングルスネット
                 self.width = 411.5+411.5+91.4+91.4
             else:
@@ -89,7 +98,7 @@ class Character:
                 self.width =  548+548+91.4+91.4
 
             self.height = 91.4
-            self.image = self.image_net
+            self.image = image_net
         if self.image_type == 3: #ボール
             self.x = -200
             self.y = draw.baseline2
@@ -101,7 +110,7 @@ class Character:
             self.height = 30
             self.color = (255,255,0)
             self.mag = 30
-            self.image = self.image_ball
+            self.image = image_ball
         if self.image_type == 4: #相手プレーヤー
             self.x = -200
             self.y = draw.baseline2
@@ -112,7 +121,7 @@ class Character:
             self.width = 100
             self.height = 100
             self.color = (26,97,167)
-            self.image = self.image_man3
+            self.image = image_man3
         if self.image_type == 5: #相手プレーヤー2
             self.x = 200
             self.y = draw.servieline2-200
@@ -123,7 +132,7 @@ class Character:
             self.width = 100
             self.height = 100
             self.color =(255,0,0)
-            self.image = self.image_man4
+            self.image = image_man4
         if self.image_type == 10: #おむすび
             self.x = random.randint(-500, 500)
             self.y = draw.baseline2
@@ -133,7 +142,7 @@ class Character:
             self.vz = +20
             self.width = 60
             self.height = 40
-            self.image = self.image_omusubi
+            self.image = image_omusubi
         if self.image_type == 11: #オープニングメッセージ1
             self.x = 0
             self.y = 1500
@@ -188,9 +197,9 @@ class Character:
             selfy_old = self.y
             self.y += self.vy
             self.z += self.vz
-            if self.x > x:
+            if self.x > 0:
                 self.vx -= 1
-            elif self.x < x:
+            elif self.x < 0:
                 self.vx += 1
             if (self.x >= 300 and self.vx > 0) or (self.x <= 10 and self.vx < 0):
                 self.vx = int(self.vx / 2)
@@ -209,7 +218,7 @@ class Character:
             if self.y >= draw.baseline2 and self.vy > 0:
                 self.vy = -self.vy
                 self.y = draw.baseline2
-        else if self.image_type == 3: #ボール
+        elif self.image_type == 3: #ボール
             self.status += 1
             self.x += self.vx
             selfy_old = self.y
@@ -220,7 +229,7 @@ class Character:
             if self.z < 0 :
                 self.vz = -self.vz *0.7
                 self.z = 0
-            if (self.y < y and self.vy < 0):
+            if (self.y < 0 and self.vy < 0):
                 self.vy = 80
                 self.vz = +20
             if (self.y > draw.baseline2 and self.vy > 0):
@@ -273,7 +282,7 @@ class Character:
 
 
     def move(self, x, y, z, status):
-
+        pass
 
 
 
