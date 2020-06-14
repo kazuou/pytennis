@@ -16,20 +16,15 @@ import draw
 print(os.getcwd())
 #SURFACE = pygame.display.set_mode((1200, 600))
 
-
-
-
 #BGM
 pygame.mixer.music.load("media/bgm.wav")
 
 def main():
     """ メインルーチン """
     #変数初期設定(基本)
-    a, b, c, d = 0, 0, 0, 0
     tc.character = [tc.Character() for i in range(20)]
     tc.character_copy = []
-    fullscreen_flag = 0
-
+    fullscreen_flag = :@
     #マウスカーソル非表示
     pygame.mouse.set_visible(True)
 

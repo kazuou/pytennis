@@ -80,7 +80,7 @@ def gameset():
                 a = 2
             elif pressed[K_SPACE] == 0 and a == 2:
                 a = 0
-                game_flag = 3
+                game_flag = 0
 
             #画面再描写(フルスクリーン対応)
             SURFACE.blit(filler, (0,0))

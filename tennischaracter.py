@@ -6,6 +6,8 @@ import random
 
 doubles = 0
 game_flag = 0
+#0
+
 
 counter = 0
 score = 0

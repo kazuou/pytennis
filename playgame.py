@@ -51,9 +51,7 @@ def playgame():
     tc.character[0].image=tc.image_man1
 
     #ループ2(ゲームメインループ)
-    while draw.game_flag < 10:
-
-
+    while draw.game_flag > 20:
 
         #キー入力判定＆とび職人移動
         if character[0].status < 200 and counter <= 5970:
@@ -121,7 +119,7 @@ def playgame():
         if character[0].status >= 200:
             character[0].failure()
             if damage == 100 and character[0].status == 259:
-                game_flag = 12
+                drow.game_flag = 11
         elif character[0].status >= 10:
             character[0].blink()
 

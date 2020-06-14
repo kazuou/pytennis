@@ -61,10 +61,10 @@ def opening():
     tc.character[7].on(12)
 
     #オープニング表示
-    draw.game_flag = 10
+    draw.game_flag = 1
 
     #ループ1(タイトル画面)
-    while draw.game_flag == 10:
+    while draw.game_flag == 1:
 
         counter += 1
 
@@ -83,7 +83,7 @@ def opening():
             a = 1
         elif pressed[K_SPACE] == 0 and a == 1:
             a = 0
-            draw.game_flag = 1
+            draw.game_flag = 21
             tc.character[6].off()
             tc.character[7].off()
 

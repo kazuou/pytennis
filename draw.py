@@ -4,8 +4,6 @@ import pygame
 import tennischaracter as tc
 from pygame.locals import *
 
-
-
 pygame.init()
 pygame.key.set_repeat(5, 5)
 VideoInfo = pygame.display.Info()
@@ -38,8 +36,10 @@ field_data = (fieldxl,fieldy1,fieldxr,fieldy2)
 court_data = (-548.5,0,543.5,2377)
 
 game_flag = 0
-
-
+#0　初期状態
+#1〜10 オープニング
+#11〜20　ゲームエンド
+#21〜   ゲーム中
 
 def location_in_view(x1, y1, z1):
     """ 3D座標から2D上の座標算出 """
@@ -204,8 +204,9 @@ def draw_all():
 
     for i in range(len(character_copy)):
         if character_copy[i].status > 0:
-            draw_character(character_copy[i].image, character_copy[i].x, character_copy[i].y, character_copy[i].z,
-                           character_copy[i].width, character_copy[i].height)
+            draw_character(character_copy[i].image, character_copy[i].x,
+                            character_copy[i].y, character_copy[i].z,
+                            character_copy[i].width, character_copy[i].height)
 
     drow_credit()
 
