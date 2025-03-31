@@ -1,0 +1,9 @@
+{
+  "files.readonlyInclude": {
+    ".refprog/*":true,
+    ".old/*":true,
+    "pystart.sh": true,
+    "pyend.sh": true,
+    "reaonly.sh": true,
+  }
+}
