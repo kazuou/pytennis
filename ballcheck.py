@@ -1,121 +1,121 @@
 import math
 
 
-def calculate_time_to_height(self, target_height):
+def calculate_time_to_height(pos,motion, target_height):
     """高さ target_height に達する時刻を計算"""
-    # y(t) = y_0 + v_y * t - (1/2) * g * t^2
+    """returnはlist"""
+
+    g = 9.8  # 重力加速度 m/s^2
+
+    v_x = motion['v'] * math.cos(motion['theta']) * math.cos(motion['phi'])
+    v_y = motion['v'] * math.cos(motion['theta']) * math.sin(motion['phi'])
+    v_z = motion['v'] * math.sin(motion['theta'])
+
+    # z(t) = z_0 + v_z * t - (1/2) * g * t^2
     # この式を解いて t を求める
     a = -0.5 * self.g
-    b = self.v_y
-    c = self.y - target_height  # 高さ50に達するためのc
+    b = v_z
+    c = pos['z'] - target_height  # 高さ50に達するための
 
     # 二次方程式を解く: at^2 + bt + c = 0
     discriminant = b**2 - 4*a*c
 
-    if discriminant < 0:
-        return None  # 解なし（物体は指定した高さに達しない）
+    tz = []
 
-    t1 = (-b + math.sqrt(discriminant)) / (2*a)
-    t2 = (-b - math.sqrt(discriminant)) / (2*a)
+    if discriminant > 0:
+        t1 = (-b + math.sqrt(discriminant)) / (2*a)
+        t2 = (-b - math.sqrt(discriminant)) / (2*a)
 
     # 時間が正の解を選ぶ
     if t1 >= 0:
-        return t1
-    elif t2 >= 0:
-        return t2
-    else:
-        return None  # 両方の解が負の場合
+        tz.append t1
+    if t2 >= 0:
+        tz.append t2
 
-def calculate_reflected_velocity(self):
-    """反射後の速度ベクトルを計算"""
-    # 水平方向の速度は変わらない
-    v_x_reflected = self.v_x
-    v_y_reflected = self.v_y
+    pos2,motion2,t0 = calculate_trajectory(pos,motion)
 
-    # 鉛直方向の速度は反射係数を掛けて方向を逆にする
-    v_z_reflected = -self.e * self.v_z
+    v2_x = motion2['v'] * math.cos(motion2['theta']) * math.cos(motio2['phi'])
+    v2_y = motion2['v'] * math.cos(motion2['theta']) * math.sin(motion2['phi'])
+    v2_z = motion2['v'] * math.sin(motion2['theta'])
 
-    # 反射後の仰角と方位角を計算
-    # 仰角 (theta')
-    theta_reflected = math.atan(math.sqrt(v_x_reflected**2 + v_y_reflected**2) / abs(v_z_reflected))
-
-    # 方位角 (phi')
-    phi_reflected = math.atan2(v_y_reflected, v_x_reflected)
-
-    return v_x_reflected, v_y_reflected, v_z_reflected, theta_reflected, phi_reflected
-
-
-def calculate_position_at_height(self, target_height):
-    """指定した高さに達した時の x, y, z 座標を計算"""
-    t_to_target = self.calculate_time_to_height(target_height)
-    
-    if t_to_target is None:
-        return None  # 高さに達しない場合
-
-    # x(t) = x_0 + v_x * t
-    x_target = self.x + self.v_x * t_to_target
     # z(t) = z_0 + v_z * t - (1/2) * g * t^2
-    z_target = self.z + self.v_z * t_to_target - 0.5 * self.g * t_to_target**2
-    # y(t) はターゲットの高さなので target_height に設定
-    y_target = target_height
-
-    return x_target, y_target, z_target
-
-def calculate_y_zero_time(self):
-    """y = 0 を通過する時刻を計算"""
-    # y(t) = y_0 + v_y * t - (1/2) * g * t^2
     # この式を解いて t を求める
-    a = -0.5 * self.g
-    b = self.v_y
-    c = self.y
+    a = -0.5 * g
+    b = v2_z
+    c = pos2['z'] - target_height  # 高さ50に達するための
 
-    # 二次方程式を解く: at^2 + bt + c = 0
+     # 二次方程式を解く: at^2 + bt + c = 0
     discriminant = b**2 - 4*a*c
 
-    if discriminant < 0:
-        return None  # 解なし（物体はy=0を通過しない）
+    if discriminant > 0:
+        t1 = (-b + math.sqrt(discriminant)) / (2*a)
+        t2 = (-b - math.sqrt(discriminant)) / (2*a)
 
-    t1 = (-b + math.sqrt(discriminant)) / (2*a)
-    t2 = (-b - math.sqrt(discriminant)) / (2*a)
-
-    # y=0 を通過する時間は 0 より大きい時間
+    # 時間が正の解を選ぶ
     if t1 >= 0:
-        return t1
-    elif t2 >= 0:
-        return t2
-    else:
-        return None  # 両方の解が負の場合
+        tz.append (t1+t0)
+    if t2 >= 0:
+        tz.append (t2+t0)
 
-def calculate_position_at_y_zero(self):
-    """y = 0 を通過した時の x, z 座標を計算"""
-    t_y_zero = self.calculate_y_zero_time()
-    
-    if t_y_zero is None:
-        return None  # y = 0 を通過しない場合
+def calculate_position_at_y_zero(pos,motion):
+    """y = 0 を通過した時の z 座標を計算"""
+    """y = 0 を通過する時刻を計算"""
+    g = 9.8  # 重力加速度 m/s^2
 
-    # x(t) = x_0 + v_x * t
-    x_zero = self.x + self.v_x * t_y_zero
-    # z(t) = z_0 + v_z * t - (1/2) * g * t^2
-    z_zero = self.z + self.v_z * t_y_zero - 0.5 * self.g * t_y_zero**2
+    # v_x = motion['v'] * math.cos(motion['theta']) * math.cos(motion['phi'])
+    v_y = motion['v'] * math.cos(motion['theta']) * math.sin(motion['phi'])
+    v_z = motion['v'] * math.sin(motion['theta'])
 
-    return x_zero, z_zero
+    # y(t) = y_0 + v_y * t = 0
+    # y_0 + v_y
+    # この式を解いて t を求める
+    t_y0 = pos['y']/v_y
+    # z(t) = z_0 + v_z * t - 0.5 * g * t ^ 2
+    z_y0 = pos['z'] + v_z * t_y0 - 0.5 * g * t_y0 ** 2
+    if z_y0 < 0 :
+        z_y0 = 0
 
-def calculate_trajectory(self):
-"""投げたときのワンバウンド地点を計算"""
-# 初速度の成分
-v_x = self.v * math.cos(self.theta) * math.cos(self.phi)
-v_y = self.v * math.cos(self.theta) * math.sin(self.phi)
-v_z = self.v * math.sin(self.theta)
+    return z_y0
 
-# 地面に着くまでの時間 (z = 0 のときの時間)
-t_f = (v_z + math.sqrt(v_z**2 + 2 * self.g * self.z)) / self.g
+def calculate_trajectory(pos,motion):
+    """投げたときのワンバウンド地点を計算"""
+    # 初速度の成分
+    g = 9.8  # 重力加速度 m/s^2
+    e = 0.8
+    v_x = motion['v'] * math.cos(motion['theta']) * math.cos(motion['phi'])
+    v_y = motion['v'] * math.cos(motion['theta']) * math.sin(motion['phi'])
+    v_z = motion['v'] * math.sin(motion['theta'])
 
-# 水平距離
-x_land = self.x + v_x * t_f
-y_land = self.y + v_y * t_f
-z_land = 0  # 着地時のz座標は0
+    # 地面に着くまでの時間 (z = 0 のときの時間)
+    t_f = (v_z + math.sqrt(v_z**2 + 2 * g * pos['z'])) / g
 
-return x_land, y_land, z_land
+    pos1 = {'x':0,'y':0,'z':0 }
+
+    # 水平距離
+    pos1['x'] = pos['x'] + v_x * t_f
+    pos1['y'] = pos['y'] + v_y * t_f
+    pos1['z'] = 0  # 着地時のz座標は0
+
+    """反射後の速度ベクトルを計算"""
+    # 水平方向の速度は変わらない
+    #pos={'x':x,'y':y,'z':z},motion={'v':v,'theta':theta 仰角,'phi':phi 方位角}
+    motion1={'v':0,'theta':0,'phi':0}
+
+    v_x_r = v_x
+    v_y_r = v_y
+
+    # 鉛直方向の速度は反射係数を掛けて方向を逆にする
+    v_z_r = -e * v_z
+
+    motion1['v'] =  math.sqrt(v_x_r**2 + v_y_r**2 + v_z_r**2)
+    # 反射後の仰角と方位角を計算
+    # 仰角 (theta')
+    motion1['theta'] = math.atan(math.sqrt(v_x_r**2 + v_y_r**2) / abs(v_z_r))
+
+    # 方位角 (phi')
+    motion1['phi'] = math.atan2(v_y_r, v_x_r)
+
+    return pos1,motion1,t_f
 
 
 def solve_quadratic(a, b, c):
@@ -130,69 +130,60 @@ def solve_quadratic(a, b, c):
         root2 = (-b - math.sqrt(discriminant)) / (2 * a)
         return [root1, root2]
 
+class Player:
+    def __int___(self,pos,maxv):
+        self._pos = dict(pos)
+        self.maxv = maxv
+    
+    def posision_start(self,pos2,t0)
+        #まず向かう場所を決める
+        self.a = 2 #m/秒^2
+        self.maxv = 5 ##m/秒
+        self._pos1 = self._pos
+        self._pos2 = pos2
+        self.t0 = t0
+
+    def 
+
+     
 
 class Ball:
-    def __int___(self,pos,motion)
-        self._pos0 = dict(pos)  # pos を辞書型として保存
-        self._motion0 = dict(motion)  # motion を辞書型として保存
+    def __int___(self,pos,motion):
+        self._pos = dict(pos)  # pos を辞書型として保存
+        self._motion = dict(motion)  # motion を辞書型として保存
         #初期化時0
-        #pos={'x'=x,'y'=y,'z'=z},mothon={'v'=v,'theta'=theta,'phi'=phi 仰角}
+        #pos={'x':x,'y':y,'z':z},motion={'v':v,'theta':theta 仰角,'phi':phi 方位角}
         #obj = Ball(pos,mothon)
+        self._pos2,self._motion2,self._t2 = calculate_trajectory(self._pos,self._motion):
+        self.z_y0 = calculate_position_at_y_zero(pos,motion):
 
-    print(self._pos0)
+    def checksort(self):
+        """
+        ネットに届いているかチェック
+        """
+        return(self.z_y0 > 0)
+    
+    def checkout(self):
+        return(self._pos2['x'] > court['x0'] and self._pos2['x'] < court['x1'] and self._pos2['y'] < court['y1'])
+     
 
-    def check_net(self,_pos0,_motion0)
-        
+fieldxl=(-548.5-652)/100  #フィールドの左のx座標　中心は0
+fieldxr=(548.5+652)/100   #フィールドの右のx座標
+fieldy1= (-1188.5-612)/100
+fieldy2=(1188.5+612)/100
+baseline2 = (1188.5)/100
+baseline1 = (-1188.5)/100
+servieline2 = (1828.5-1188.5)/100
+servieline1 = (548.5-1188.5)/100
 
-    def calculate_trajectory(self):
-        """投げたときのワンバウンド地点を計算"""
-        # 初速度の成分
-        v_x = self.v * math.cos(self.theta) * math.cos(self.phi)
-        v_y = self.v * math.cos(self.theta) * math.sin(self.phi)
-        v_z = self.v * math.sin(self.theta)
+netline=0
 
-        # 地面に着くまでの時間 (z = 0 のときの時間)
-        t_f = (v_z + math.sqrt(v_z**2 + 2 * self.g * self.z)) / self.g
-
-        # 水平距離
-        x_land = self.x + v_x * t_f
-        y_land = self.y + v_y * t_f
-        z_land = 0  # 着地時のz座標は0
-
-        return x_land, y_land, z_land
-
-    def calculate_position_at_y_zero(self):
-        """y = 0 を通過した時の x, z 座標を計算"""
-        t_y_zero = self.calculate_y_zero_time()
-        
-        if t_y_zero is None:
-            return None  # y = 0 を通過しない場合
-
-        # x(t) = x_0 + v_x * t
-        x_zero = self.x + self.v_x * t_y_zero
-        # z(t) = z_0 + v_z * t - (1/2) * g * t^2
-        z_zero = self.z + self.v_z * t_y_zero - 0.5 * self.g * t_y_zero**2
-
-        return x_zero, z_zero
-
-
-    def check_short(self, threshold=1.0):
-        pos2 = 
-        """v が threshold より小さいかどうかをチェック"""
-        return self.v < threshold
-
-
-def checksort(hit):
-    """
-    ネットに届いているかチェック
-    """
-
-
-def checlnet():
-    """
-    ネットを超えているかチェック
-    """
-
+#フィールドサイズ。移動可能範囲
+field = {'x0':fieldxl,'y0':fieldy1,'x1':fieldxr,'y1':fieldy2}
+#コートサイズ判定用。
+court = {'x0':-548.5/100, 'y0':-1188.5/100, 'x1':543.5/100,'y1':1188.5/100}
+#コートサイズ描画用
+courtdrow = {'x0':-411.5/100, 'y0':-1188.5/100, 'x1':411.5/100,'y1':1188.5/100}
 
 def main():
     # 初期条件を設定する
@@ -232,3 +223,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#採点 0 ネット
+#採点 1 アウト
+#採点 2 返ってきたボールが取れない
+#採点 5 相手が取れない
