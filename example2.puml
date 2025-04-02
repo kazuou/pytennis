@@ -13,3 +13,120 @@ Authentication -> Database : Uses
 Payment -> Database : Uses
 
 @enduml
+
+@startuml
+'配置図（deployment diagram）
+node "Web Server" {
+    component "UserInterface"
+}
+
+node "Application Server" {
+    component "Authentication"
+    component "Payment"
+}
+
+node "Database Server" {
+    database "Database"
+}
+
+' Dependencies
+"UserInterface" ..> "Authentication" : uses
+"UserInterface" ..> "Payment" : uses
+"Authentication" ..> "Database" : uses
+"Payment" ..> "Database" : uses
+@enduml
+@startuml
+'アクティビティ図（activity diagram）
+:開始処理;
+if (条件A) then (yes)
+  :処理A;
+else (no)
+  :処理B;
+endif
+:終了処理;
+stop
+
+@enduml
+@startuml
+'ユースケース図（use case diagram）
+actor User
+actor Admin
+
+usecase "Login" as UC1
+usecase "Register" as UC2
+usecase "Manage Users" as UC3
+
+User --> UC1
+User --> UC2
+Admin --> UC1
+Admin --> UC3
+UC1 <-- UC3: includes
+
+@enduml
+@startuml
+'タイミング図（timing diagram）
+robust Device
+robust System
+
+@0
+Device is idle
+System is idle
+@5
+Device is active
+System is waiting
+@10
+Device is processing
+System is working
+@20
+Device is idle
+System is idle
+
+@enduml
+
+@startuml
+
+'ステートマシン図（state machine diagram）
+[*] --> State1
+State1 --> State2 : イベントA
+State2 --> State3 : イベントB
+State3 --> [*]
+State3 --> State1 : イベントC
+@enduml
+
+@startuml
+
+'シーケンス図 (Sequence Diagram)
+actor User
+User -> Shop : searchProduct()
+Shop --> User : displayResults()
+User -> Shop : placeOrder()
+Shop -> Warehouse : checkStock()
+Warehouse --> Shop : itemAvailable()
+Shop --> User : confirmOrder()
+
+
+@enduml
+
+@startuml
+'コミュニケーション図 (Communication Diagram)
+actor User
+participant Shop
+participant Warehouse
+
+User -> Shop : searchProduct()
+Shop --> User : displayResults()
+User -> Shop : placeOrder()
+Shop -> Warehouse : checkStock()
+Warehouse --> Shop : itemAvailable()
+Shop --> User : confirmOrder()
+@enduml
+
+@startuml
+'相互作用概要図（interaction overview diagram）
+concise "Start" as start
+concise [Sequence Diagram] as sd
+concise "End" as end
+
+start --> sd
+sd --> end
+@enduml

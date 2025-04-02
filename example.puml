@@ -34,6 +34,9 @@ class Teacher extends Person {
 
 Person <|-- Student
 Person <|-- Teacher
+@enduml
+
+@startuml
 'オブジェクト図 (Object Diagram)
 
 object student1 {
@@ -47,6 +50,9 @@ object teacher1 {
     age = 35
     teacherId = 6789
 }
+@enduml
+
+@startuml
 'パッケージ図（package diagram）
 
 package "com.example.account" {
@@ -70,7 +76,9 @@ Payment <|-- PaymentService
 
 User -- Account : owns
 Account -- Payment : processes
+@enduml
 
+@startuml
 '複合構造図（composite structure diagram）
 
 class Car {
@@ -88,34 +96,4 @@ class Wheel {
 
 Car *-- Engine
 Car *-- Wheel
-
-
-
-'相互作用図（interaction diagram）シーケンス図（sequence diagram）
-actor User
-User -> Shop : searchProduct()
-Shop --> User : displayResults()
-User -> Shop : placeOrder()
-Shop -> Warehouse : checkStock()
-Warehouse --> Shop : itemAvailable()
-Shop --> User : confirmOrder()
-''相互作用図（interaction diagram）コミュニケーション図（communication diagram）
-actor User
-participant Shop
-participant Warehouse
-
-User -> Shop : searchProduct()
-Shop --> User : displayResults()
-User -> Shop : placeOrder()
-Shop -> Warehouse : checkStock()
-Warehouse --> Shop : itemAvailable()
-Shop --> User : confirmOrder()
-
-'相互作用概要図（interaction overview diagram）
-concise "Start" as start
-concise [Sequence Diagram] as sd
-concise "End" as end
-
-start --> sd
-sd --> end
 @enduml

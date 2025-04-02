@@ -1,9 +1,0 @@
-@startuml
-
-'ステートマシン図（state machine diagram）
-[*] --> State1
-State1 --> State2 : イベントA
-State2 --> State3 : イベントB
-State3 --> [*]
-State3 --> State1 : イベントC
-@enduml
