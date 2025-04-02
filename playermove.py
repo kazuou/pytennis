@@ -46,6 +46,49 @@ a = 2.0       # Acceleration
 # distance = max_distance(v_max, a, t)
 # print(f"The maximum distance traveled is {distance:.2f} meters.")
 
+class Character:
+    """キャラクターーオブジェクト"""
+    def __init__(self):
+        self.status = 0
+        self.jump_status = 0
+        self.image_type = 0 #
+        self.x = 0
+        self.y = 0
+        self.z = 0
+        self.vx = 0
+        self.vy = 0
+        self.vz = 0
+        self.rotx = 0   #回転　ボールのみ
+        self.roty = 0
+        self.rotz = 0
+        self.dx = 0     #目的地
+        self.dy = 0
+        self.dz = 0
+        self.shotgear=50
+        self.movegear=50
+        self.width = 0
+        self.height = 0
+        self.mag = 1 #サイズと表示の倍率(ボールを大きく見せるため)
+        self.color = (255,255,255)
+        self.image = image_man1
+
+    #表示オン
+    def on(self, image_type,game_flag=0):
+        self.status = 1
+        self.image_type = image_type
+        if self.image_type == 0: #私
+            self.jump_status = 1
+            self.x = -200
+            self.y = -10
+            self.z = 0
+            self.vx = 0
+            self.vy = 0
+            self.vz = 0
+            self.width = 100
+            self.height = 170
+            self.image = image_man1_1
+
+
 class Player:
     def __int___(self,pos,motion):
         self._pos = dict(pos)  # pos を辞書型として保存
