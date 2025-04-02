@@ -1,4 +1,6 @@
 import math
+from obje3d import Object3D
+
 
 
 def calculate_time_to_height(pos,motion, target_height):
@@ -145,7 +147,17 @@ class Player:
 
     def 
 
-     
+#object3Dの子
+class Leaf(Object3D):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z)
+        self.color = (0, 255, 0)  # 緑色
+
+    def update(self, time):
+        self.move(0, time * 0.1, 0)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 5)
 
 class Ball:
     def __int___(self,pos,motion):

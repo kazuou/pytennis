@@ -1,0 +1,121 @@
+@startuml
+
+' 大きく分けてシステムの構造を表す構造図（structure diagram）と、
+' 動作や変化を表す振る舞い図（behavior diagram）の2種類に分類される。
+'クラス図
+
+class A {
+    - attribute1 : int
+    - attribute2 : String
+    + method1()
+    + method2(arg : int)
+}
+
+class B extends A {
+    - attribute3 : double
+    + method3()
+}
+class Person {
+    - name : String
+    - age : int
+    + getName() : String
+    + getAge() : int
+}
+
+class Student extends Person {
+    - studentId : int
+    + getStudentId() : int
+}
+
+class Teacher extends Person {
+    - teacherId : int
+    + getTeacherId() : int
+}
+
+Person <|-- Student
+Person <|-- Teacher
+'オブジェクト図 (Object Diagram)
+
+object student1 {
+    name = "John Doe"
+    age = 20
+    studentId = 12345
+}
+
+object teacher1 {
+    name = "Jane Smith"
+    age = 35
+    teacherId = 6789
+}
+'パッケージ図（package diagram）
+
+package "com.example.account" {
+    class Account
+    class AccountService
+}
+
+package "com.example.user" {
+    class User
+    class UserService
+}
+
+package "com.example.payment" {
+    class Payment
+    class PaymentService
+}
+
+Account <|-- AccountService
+User <|-- UserService
+Payment <|-- PaymentService
+
+User -- Account : owns
+Account -- Payment : processes
+
+'複合構造図（composite structure diagram）
+
+class Car {
+    - engine : Engine
+    - wheel : Wheel[4]
+}
+
+class Engine {
+    - horsepower : int
+}
+
+class Wheel {
+    - radius : float
+}
+
+Car *-- Engine
+Car *-- Wheel
+
+
+
+'相互作用図（interaction diagram）シーケンス図（sequence diagram）
+actor User
+User -> Shop : searchProduct()
+Shop --> User : displayResults()
+User -> Shop : placeOrder()
+Shop -> Warehouse : checkStock()
+Warehouse --> Shop : itemAvailable()
+Shop --> User : confirmOrder()
+''相互作用図（interaction diagram）コミュニケーション図（communication diagram）
+actor User
+participant Shop
+participant Warehouse
+
+User -> Shop : searchProduct()
+Shop --> User : displayResults()
+User -> Shop : placeOrder()
+Shop -> Warehouse : checkStock()
+Warehouse --> Shop : itemAvailable()
+Shop --> User : confirmOrder()
+
+'相互作用概要図（interaction overview diagram）
+concise "Start" as start
+concise [Sequence Diagram] as sd
+concise "End" as end
+
+start --> sd
+sd --> end
+@enduml

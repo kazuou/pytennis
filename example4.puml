@@ -1,0 +1,12 @@
+@startuml
+'アクティビティ図（activity diagram）
+:開始処理;
+if (条件A) then (yes)
+  :処理A;
+else (no)
+  :処理B;
+endif
+:終了処理;
+stop
+
+@enduml

@@ -1,6 +1,11 @@
 import numpy as np
 import math
 #
+from obje3d import Object3D
+
+
+
+
 def max_distance(t):
     """
     Calculate the maximum distance traveled given the maximum speed, acceleration, and total time.
@@ -88,6 +93,16 @@ class Character:
             self.height = 170
             self.image = image_man1_1
 
+class Person(Object3D):
+    def __init__(self, pos):
+        super().__init__(pos)
+        self.color = (255, 0, 0)  # 赤色
+
+    def update(self, time):
+        self.move(time * 0.1, 0, 0)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 10)
 
 class Player:
     def __int___(self,pos,motion):

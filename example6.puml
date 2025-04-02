@@ -1,0 +1,19 @@
+@startuml
+'タイミング図（timing diagram）
+robust Device
+robust System
+
+@0
+Device is idle
+System is idle
+@5
+Device is active
+System is waiting
+@10
+Device is processing
+System is working
+@20
+Device is idle
+System is idle
+
+@enduml

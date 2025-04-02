@@ -1,0 +1,21 @@
+@startuml
+'配置図（deployment diagram）
+node "Web Server" {
+    component "UserInterface"
+}
+
+node "Application Server" {
+    component "Authentication"
+    component "Payment"
+}
+
+node "Database Server" {
+    database "Database"
+}
+
+' Dependencies
+"UserInterface" ..> "Authentication" : uses
+"UserInterface" ..> "Payment" : uses
+"Authentication" ..> "Database" : uses
+"Payment" ..> "Database" : uses
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+'コンポーネント図（component diagram）
+' Define components
+component UserInterface
+component Authentication
+component Payment
+component Database
+
+' Define interfaces within components
+UserInterface -> Authentication : Uses
+UserInterface -> Payment : Uses
+Authentication -> Database : Uses
+Payment -> Database : Uses
+
+@enduml
