@@ -7,13 +7,13 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Tennis Board Game")
 clock = pygame.time.Clock()
 
-# F’è‹`
+# è‰²å®šç¾©
 WHITE = (255, 255, 255)
 GREEN = (0, 200, 0)
 RED = (255, 0, 0)
 BLUE = (0, 100, 255)
 
-# ‰Šúó‘Ô
+# åˆæœŸçŠ¶æ…‹
 angle = 45
 speed = 15
 target_pos = None
@@ -22,21 +22,24 @@ show_trajectory = False
 
 font = pygame.font.SysFont(None, 24)
 
+
 def draw_court():
     screen.fill(GREEN)
-    pygame.draw.line(screen, WHITE, (0, HEIGHT//2), (WIDTH, HEIGHT//2), 2)
-    # ƒlƒbƒg’†‰›ü
-    pygame.draw.rect(screen, WHITE, (WIDTH//2 - 5, HEIGHT//2 - 30, 10, 60), 1)
+    pygame.draw.line(screen, WHITE, (0, HEIGHT // 2), (WIDTH, HEIGHT // 2), 2)
+    # ãƒãƒƒãƒˆä¸­å¤®ç·š
+    pygame.draw.rect(screen, WHITE, (WIDTH // 2 - 5, HEIGHT // 2 - 30, 10, 60), 1)
+
 
 def draw_text(text, pos):
     img = font.render(text, True, WHITE)
     screen.blit(img, pos)
 
+
 def calculate_trajectory(start, target, speed, angle_deg):
-    # ƒVƒ“ƒvƒ‹‚È•ú•¨ü‹O“¹‚ğ•`‚­id—Í‚Æ‹ÂŠp‚Ì‚İj
+    # ã‚·ãƒ³ãƒ—ãƒ«ãªæ”¾ç‰©ç·šè»Œé“ã‚’æãï¼ˆé‡åŠ›ã¨ä»°è§’ã®ã¿ï¼‰
     g = 0.5
     angle_rad = math.radians(angle_deg)
-    vx = (target[0] - start[0]) / 20  # ‰¼‚Ì‘¬“x
+    vx = (target[0] - start[0]) / 20  # ä»®ã®é€Ÿåº¦
     vy = -speed * math.sin(angle_rad)
     points = []
     x, y = start
@@ -47,28 +50,31 @@ def calculate_trajectory(start, target, speed, angle_deg):
         points.append((int(x), int(y)))
     return points
 
+
 running = True
 while running:
     screen.fill((0, 0, 0))
     draw_court()
 
-    draw_text(f"Angle: {angle}‹", (10, 10))
+    draw_text(f"Angle: {angle}Â°", (10, 10))
     draw_text(f"Speed: {speed}", (10, 30))
 
     if target_pos:
         pygame.draw.circle(screen, RED, target_pos, 5)
-        draw_text("Target", (target_pos[0]+5, target_pos[1]))
+        draw_text("Target", (target_pos[0] + 5, target_pos[1]))
 
     if move_pos:
         pygame.draw.circle(screen, BLUE, move_pos, 5)
-        draw_text("MoveTo", (move_pos[0]+5, move_pos[1]))
+        draw_text("MoveTo", (move_pos[0] + 5, move_pos[1]))
 
     if show_trajectory and target_pos:
-        trajectory = calculate_trajectory((WIDTH//2, HEIGHT - 50), target_pos, speed, angle)
+        trajectory = calculate_trajectory(
+            (WIDTH // 2, HEIGHT - 50), target_pos, speed, angle
+        )
         for point in trajectory:
             pygame.draw.circle(screen, WHITE, point, 2)
 
-    # OKƒ{ƒ^ƒ“
+    # OKãƒœã‚¿ãƒ³
     ok_rect = pygame.Rect(WIDTH - 100, HEIGHT - 40, 80, 30)
     pygame.draw.rect(screen, (100, 200, 100), ok_rect)
     draw_text("OK", (WIDTH - 75, HEIGHT - 35))
@@ -86,12 +92,12 @@ while running:
                 move_pos = (mx, my)
             elif ok_rect.collidepoint(event.pos):
                 if target_pos and move_pos:
-                    print("Œˆ’è‚³‚ê‚½“ü—Í:")
-                    print(f"  ¨ ‘Å‚Â•ûŒü: {target_pos}")
-                    print(f"  ¨ ‹ÂŠp: {angle}")
-                    print(f"  ¨ ƒXƒs[ƒh: {speed}")
-                    print(f"  ¨ ˆÚ“®æ: {move_pos}")
-                    # ó‘ÔƒŠƒZƒbƒg‚Ü‚½‚ÍŸ‚ÌƒtƒF[ƒY‚Ö
+                    print("æ±ºå®šã•ã‚ŒãŸå…¥åŠ›:")
+                    print(f"  â†’ æ‰“ã¤æ–¹å‘: {target_pos}")
+                    print(f"  â†’ ä»°è§’: {angle}")
+                    print(f"  â†’ ã‚¹ãƒ”ãƒ¼ãƒ‰: {speed}")
+                    print(f"  â†’ ç§»å‹•å…ˆ: {move_pos}")
+                    # çŠ¶æ…‹ãƒªã‚»ãƒƒãƒˆã¾ãŸã¯æ¬¡ã®ãƒ•ã‚§ãƒ¼ã‚ºã¸
                     target_pos = None
                     move_pos = None
                     show_trajectory = False
