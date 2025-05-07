@@ -71,6 +71,8 @@ controler_y = field_height + 100
 controler_rect = pygame.Rect(0, controler_y, field_width, field_height + 200)
 field_bottom = (center_y - field_height - 100) / scale
 field_top = (center_y - 100) / scale
+field_l = -16.89
+field_r = 16.89
 
 # field_width = int(2097 * scale)
 # field_height = int(3379 * scale)
@@ -386,9 +388,46 @@ while True:
                     ball_flying = True
                 elif turn == 5:
                     initplay()
+                    turn = 0
+                elif turn == 0:
                     turn = 1
             if turn == 0:
-                pass
+                if (p1_games + p2_games) % 2 == 0:
+                    b2 = +100
+                    t2 = field_top
+                    l2 = field_l
+                    r1 = field_r
+
+                    b1 = court_bottom - 1
+                    t1 = court_bottom
+                    if (p1_point + p2_point) % 2 == 0:
+                        l1 = 0
+                        r1 = court_r
+                    else :
+                        l1 = court_l
+                        r1 = 0
+                else:
+                    b1 = field_bottom
+                    t1 = -100
+                    l1 = field_l
+                    r1 = field_r
+                    b2 =court_top
+                    t2 =court_top +1
+                    if (p1_point + p2_point) % 2 == 0:
+                        l2 = court_l
+                        r2 = 0
+                    else :
+                        l2 = 0
+                        r2 = court_r
+                if t1 > my > b1 and l1 < mx < r1:
+                    p1_pos = [mx,my]
+                elif t2 > my > b2 and l2 < mx r2:
+                    p2_pos = [mx,my]
+                
+ 
+
+                  
+
                 # プレーヤー1はサービスをする場所を決める
                 # プレーヤー2は受け取る場所を決める
 
