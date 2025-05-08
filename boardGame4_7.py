@@ -8,7 +8,18 @@ def rgb(r, g, b):
     return (r, g, b)
 
 
-if socket.gethostname() == "Cortina.local":
+# 自分のホスト名からIPアドレスを取得
+host_name = socket.gethostname()
+ip_address = socket.gethostbyname(host_name)
+
+# IPアドレスをドットで分割して、最後の部分を取得
+last_octet = ip_address.split(".")[-1]
+
+print(f"最後のIPアドレスの数字は: {last_octet}")
+
+# if socket.gethostname() == "Cortina.local":
+# if host_name == "Cortina.local":
+if "Cortina" in host_name:
     fontname = "ヒラキノ角コシックw3"
 else:
     fontname = "yugothic"
