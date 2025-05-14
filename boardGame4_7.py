@@ -137,7 +137,7 @@ ball_vy = 0
 ball_vz = 0
 g = 9.8
 ball_vmax = 30  # 時速100kmは秒速28mです。
-ball_vzmax = 10  # 秒速9.9m/sで5mm打ち上がる
+ball_vzmax = 10  # 秒速9.9m/sで5m打ち上がる
 ball_vzmin = 1
 
 # 状態管理
@@ -397,10 +397,10 @@ while True:
 
             # OKボタンクリックでターンを進める（打ち終わり時にのみ）
             if ok_button_rect.collidepoint(mxs, mys):
-                if turn == 1 and p1_pos_target:
+                if turn == 1 and ball_landing_pos2:
                     turn = 2
                     p2_pos_target = p2_pos[:]
-                elif turn == 3 and p2_pos_target:
+                elif turn == 3 and ball_landing_pos2:
                     turn = 4
                     p1_pos_target = p1_pos[:]
                 elif turn == 2 and p2_pos_target:
