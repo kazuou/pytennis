@@ -4,6 +4,100 @@ import math
 import socket
 
 
+# 状態クラス
+class GameState:
+    def __init__(
+        self, ball_pos, ball_vel, landing_pos, c_player_pos, d_player_pos_target, turn
+    ):
+        self.ball_pos = ball_pos  # d_player打った場所(x,y,z,t)
+        self.ball_vel = ball_vel  # ボールの速度ベクトル(vx,vy,vz)
+        self.landig_pos = landing_pos
+        self.c_player_pos = c_player_pos
+        self.d_player_pos = ball_pos[1, 2]
+        self.d_player_pos_target = d_player_pos_target
+        self.turn = turn
+
+
+def ai_worker(state):
+    global ai_result, ai_thinking
+    ai_result = minimax(state, MAX_DEPTH, True)
+    ai_thinking = False
+
+
+# アクション生成
+def generate_possible_actions(state, player):
+    actions = []
+    for angle in range(0, 360, 45):
+        for speed in [10, 15, 20]:
+            vx = speed * math.cos(math.radians(angle))
+            vy = speed * math.sin(math.radians(angle))
+            actions.append((vx, vy))
+    return actions
+
+
+# アクション適用
+def apply_action(state, action, player):
+    new_state = copy.deepcopy(state)
+    new_state.ball_vel = action
+    new_state.turn = 2 if player == 1 else 4
+    return new_state
+
+
+# ゲーム終了判定
+def is_terminal(state):
+    x, y = state.ball_pos
+    return not (0 <= x <= COURT_WIDTH and 0 <= y <= COURT_HEIGHT)
+
+
+# 評価関数
+def evaluate(state):
+    if is_terminal(state):
+        # ターンによって、誰がボールを取れなかったか判定
+        if state.turn in [3, 4]:
+            # プレイヤー2が取れなかった → AIの負け
+            return -1e6
+        else:
+            # プレイヤー1が取れなかった → AIの勝ち
+            return +1e6
+    # 通常時は相手プレーヤーからボールが遠いほどスコアが高い。
+    if state.turn in [3, 4]:
+        px, py = state.player1_pos
+    else:
+        px, py = state.player2_pos
+    bx, by = state.ball_pos
+    return math.hypot(px - bx, py - by)
+
+
+# Minimax
+def minimax(state, depth, maximizing):
+    if depth == 0 or is_terminal(state):
+        return evaluate(state), None
+
+    if maximizing:  # AIプレーヤ
+        max_eval = float("-inf")  # 最小の値
+        best_action = None
+        for action in generate_possible_actions(state, 2):
+            # generate_possine_action関数が出してきて、使えるアクション最大24通りをすべてやる。
+            next_state = apply_action(state, action, 2)
+            next_state.ball_pos = simulate_ball_motion(next_state)
+            eval, _ = minimax(next_state, depth - 1, False)  # _は捨てている
+            if eval > max_eval:
+                max_eval = eval
+                best_action = action
+        return max_eval, best_action
+    else:  # プレーヤー
+        min_eval = float("inf")  # 最大の値
+        best_action = None
+        for action in generate_possible_actions(state, 1):
+            next_state = apply_action(state, action, 1)
+            next_state.ball_pos = simulate_ball_motion(next_state)
+            eval, _ = minimax(next_state, depth - 1, True)
+            if eval < min_eval:
+                min_eval = eval
+                best_action = action
+        return min_eval, best_action
+
+
 def rgb(r, g, b):
     return (r, g, b)
 
@@ -293,21 +387,20 @@ def check_net(x0, z0):
         return True
     return False
 
-def adjust_target(p_pos,p_pos_target,time_limit):
-    x1,y1 = p_pos
-    x2,y2 = p_pos_target
+
+def adjust_target(p_pos, p_pos_target, time_limit):
+    x1, y1 = p_pos
+    x2, y2 = p_pos_target
     distance = math.hypot(x2 - x1, y2 - y1)
     max_distance = player_vmax * time_limit
     if distance <= max_distance:
-        return [x2, y2]   # リスト形式で返却
+        return [x2, y2]  # リスト形式で返却
     else:
         ratio = max_distance / distance
         new_x = x1 + (x2 - x1) * ratio
         new_y = y1 + (y2 - y1) * ratio
         return [new_x, new_y]
 
-
-   
 
 def draw_trajectory(start_pos, vx, vy, tend):
     """ボールの軌道を表示"""
@@ -392,10 +485,14 @@ while True:
                 elif turn == 2 and p2_pos_target:
                     print(ball_pos_target)
                     print(ball_pos_target[3])
-                    p1_pos_target = adjust_target(p1_pos,p1_pos_target,ball_pos_target[3])
+                    p1_pos_target = adjust_target(
+                        p1_pos, p1_pos_target, ball_pos_target[3]
+                    )
                     ball_flying = True
                 elif turn == 4 and p1_pos_target:
-                    p2_pos_target = adjust_target(p2_pos,p2_pos_target,ball_pos_target[3])
+                    p2_pos_target = adjust_target(
+                        p2_pos, p2_pos_target, ball_pos_target[3]
+                    )
                     ball_flying = True
                 elif turn == 5:
                     initplay()
@@ -626,7 +723,7 @@ while True:
                 current_ball[1] + ball_vy * t_flight2,
             )
 
-            for i in range(3,20):
+            for i in range(3, 20):
                 z = i * 0.1
 
                 b = -ball_vz
