@@ -2,6 +2,11 @@ import pygame
 import math
 import copy
 import random
+import threading
+
+ai_thinking = False
+ai_result = None
+
 
 # Minimaxで必要な関数
 # is_terminal(state) 相手がボールを取れなければ勝ち
@@ -34,6 +39,12 @@ class GameState:
         self.player1_pos = player1_pos
         self.player2_pos = player2_pos
         self.turn = turn
+
+
+def ai_worker(state):
+    global ai_result, ai_thinking
+    ai_result = minimax(state, MAX_DEPTH, True)
+    ai_thinking = False
 
 
 # アクション生成
@@ -135,6 +146,8 @@ def draw(state):
 
 # メインループ
 def main():
+    global ai_result
+    global ai_thinking
     state = GameState(
         ball_pos=(50, 25),
         ball_vel=(0, 0),
@@ -156,6 +169,18 @@ def main():
         if is_terminal(state):
             print("ゲーム終了: ボールがコート外に出た")
             break
+
+        # AIの思考に入る
+        if state.turn == 3 and not ai_thinking:
+            print("AI 思考中...")
+            ai_thinking = True
+            threading.Thread(target=ai_worker, args=(copy.deepcopy(state),)).start()
+
+        # AIの思考から出る
+        if state.turn == 3 and ai_result:
+            _, best_action = ai_result
+            state = apply_action(state, best_action, player=2)
+            ai_result = None
 
         # プレイヤー1 打つ（マウスクリックで方向指定）
         if state.turn == 1:

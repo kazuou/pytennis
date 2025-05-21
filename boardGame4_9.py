@@ -18,6 +18,12 @@ class GameState:
         self.turn = turn
 
 
+def ai_worker(state):
+    global ai_result, ai_thinking
+    ai_result = minimax(state, MAX_DEPTH, True)
+    ai_thinking = False
+
+
 # アクション生成
 def generate_possible_actions(state, player):
     actions = []
