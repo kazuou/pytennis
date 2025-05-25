@@ -59,6 +59,7 @@ def generate_possible_actions(state, player):
 
 
 # アクション適用
+#  next_state = apply_action(state, action, 1)
 def apply_action(state, action, player):
     new_state = copy.deepcopy(state)
     new_state.ball_vel = action

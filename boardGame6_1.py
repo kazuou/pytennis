@@ -32,14 +32,24 @@ scale = 20
 field_width = int(20.97 * scale)
 field_height = int(33.79 * scale)
 
-# 原点定義
-center_x = field_width // 2
-center_y = field_height // 2 + 100
-
 # 画面設定
 screen = pygame.display.set_mode((field_width, field_height + 200))
 pygame.display.set_caption("テニスボードゲーム")
 clock = pygame.time.Clock()
+
+# 色定義
+GREEN = rgb(0, 128, 0)
+BLUE = rgb(0, 102, 204)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
+GRAY = rgb(200, 200, 200)
+GRAY2 = rgb(150, 150, 150)
+YELLOW = (255, 255, 0)
+
+# 原点定義
+center_x = field_width // 2
+center_y = field_height // 2 + 100
 
 
 # コート描画
@@ -57,33 +67,32 @@ court_l = -4.115
 court_r = 4.116
 service_line = 6.40
 
-# スコアーボード
 scoreBoard_y = 0
 scoreBoard_rect = pygame.Rect(0, 0, field_width, 100)
-# コントローラー
 controler_y = field_height + 100
 controler_rect = pygame.Rect(0, controler_y, field_width, field_height + 200)
-
 field_bottom = (center_y - field_height - 100) / scale
 field_top = (center_y - 100) / scale
 field_l = -16.89
 field_r = 16.89
 
-# field_width = int(2097 * scale)
-# field_height = int(3379 * scale)
-# controler_height = 100
-ballhit = []
 
 # プレイヤー設定
-player_radius = 0.1
+player_radius = 10
 p1_pos = [0, -11.90]  # 手前
 p2_pos = [0, 11.90]  # 奥
 p1_pos_target = p1_pos[:]
 p2_pos_target = p2_pos[:]
 player_vmax = 5
 
+# field_width = int(2097 * scale)
+# field_height = int(3379 * scale)
+# controler_height = 100
+ballhit = []
+
+
 # ボール設定
-BALL_RADIUS = 0.5
+ball_radius = 5
 ball_pos = [p1_pos[0], p1_pos[1], 1.00]
 ball_pos_target = [p1_pos[0], p1_pos[1], 1.00, 0]
 ball_vx = 0
@@ -92,10 +101,10 @@ ball_vz = 0
 g = 9.8
 ball_vmax = 30  # 時速100kmは秒速28mです。
 ball_vzmax = 10  # 秒速9.9m/sで5m打ち上がる
-ball_vzmin = -10
+ball_vzmin = 1
 
 # 状態管理
-turn = 0  # 0(ready),1(service),2(service),3(s),4,11,12,13,14,20
+turn = 0
 ball_flying = False
 ball_landing_pos = None
 ball_landing_pos2 = None
@@ -109,185 +118,6 @@ p1_games = 0
 p2_games = 0
 shot = 0
 coartChange = 0
-
-
-# スライダー設定
-slider_length = 150
-slider_height = 10
-slider_x = 50
-z_slider_y = controler_y + 20
-h_slider_y = controler_y + 60
-
-z_slider_val = (ball_vzmax - ball_vzmax) // 2
-h_slider_val = ball_vmax // 2
-
-ok_button_x = slider_x + slider_length + 150
-ok_button_y = controler_y + 20
-
-# draw_slider(slider_x, z_slider_y, z_slider_val, 20, "Z速度")
-# draw_slider(slider_x, h_slider_y, h_slider_val, 40, "水平速度")
-message2 = "プレイ"
-
-# 色定義
-GREEN = rgb(0, 128, 0)
-BLUE = rgb(0, 102, 204)
-WHITE = rgb(255, 255, 255)
-RED = rgb(255, 0, 0)
-BLACK = rgb(0, 0, 0)
-GRAY = rgb(200, 200, 200)
-GRAY2 = rgb(150, 150, 150)
-YELLOW = (255, 255, 0)
-
-
-# 状態クラス
-class GameState:
-    """
-    def __init__(self, ball_pos, ball_vel, player1_pos, player2_pos, turn):
-        self.ball_pos = ball_pos
-        self.ball_vel = ball_vel  # ボールの速度ベクトル
-        self.player1_pos = player1_pos
-        self.player2_pos = player2_pos
-        self.turn = turn
-    """
-
-    def __init__(self):
-        self.ball_pos = [0, 0, 0]
-        self.ball_vel = [0, 0, 0, 0]
-        self.ball_landing_pos = [0, 0, 0]
-        self.ball_landing_pos2 = None
-        self.ball_target_pos = None
-        self.p1_pos = [0, 0]
-        self.p1_target_pos = [0, 0]
-        self.p2_pos = [0, 0]
-        self.p2_target_pos = [0, 0]
-        self.turn = 0  # 0,#11,#12
-
-
-# ゲーム終了判定
-def is_terminal(state):
-    if check_net(x0, z0):
-        return -1
-    if not catch():
-        return 1
-    else:
-        return 0
-
-
-def mesh_points(range_xy, interval=1.0):
-    """
-    指定矩形範囲内をinterval間隔のグリッドで全ポイントを返す。
-    範囲の中心点を必ず含むように調整する。
-
-    range_xy: ((x1, y1), (x2, y2))
-    interval: メッシュ間隔（デフォルト1.0）
-
-    戻り値: [(x, y), ...]
-    """
-    (x1, y1), (x2, y2) = range_xy
-    min_x, max_x = min(x1, x2), max(x1, x2)
-    min_y, max_y = min(y1, y2), max(y1, y2)
-
-    # 中心点
-    center_x = (min_x + max_x) / 2
-    center_y = (min_y + max_y) / 2
-
-    # 開始点（中心を含むようにinterval単位で調整）
-    # start_x = center_x - interval * int((center_x - min_x) / interval)
-    # start_y = center_y - interval * int((center_y - min_y) / interval)
-
-    # x, y 軸のメッシュリスト
-    x_list = [center_x]
-    x1 = center_x + interval
-    x2 = center_x - interval
-    while x1 <= max_x:
-        x_list.append(round(x1, 2))
-        x_list.append(round(x2, 2))
-        x1 += interval
-        x2 -= interval
-
-    y_list = [center_y]
-    y1 = center_y + interval
-    y2 = center_y - interval
-
-    while y1 <= max_y:
-        y_list.append(round(y1, 2))
-        y_list.append(round(y2, 2))
-        y1 += interval
-        y2 -= interval
-
-    # 全点の組み合わせ
-    """
-    result = []
-    for x in x_list:
-        for y in y_list:
-            result.append((x, y))
-    """
-    points = [(x, y) for x in x_list for y in y_list]
-    return points
-
-
-# アクション生成
-def generate_possible_actions(state):
-    def rangeB(turn):
-        rangeB1 = ((court_l, 1), (court_r, court_top))
-        rangeB1S1 = ((court_l, 1), (0, service_line))
-        rangeB1S2 = ((0, 1), (court_r, service_line))
-        rangeB2 = ((court_l, court_bottom), (court_r, -1))
-        rangeB2S1 = ((0, -service_line), (court_r, -1))
-        rangeB2S2 = ((court_l, -service_line), (0, -1))
-        if turn == 1:
-            return mesh_points(rangeB1S1)
-        if turn == 2:
-            return mesh_points(rangeB1S2)
-        if turn == 3:
-            return mesh_points(rangeB2S1)
-        if turn == 4:
-            return mesh_points(rangeB2S2)
-        if turn == 12:
-            return mesh_points(rangeB1)
-        if turn == 14:
-            return mesh_points(rangeB2)
-
-    def rangeP1(turn):
-        rangeP1 = ((field_l, field_bottom), (field_r, -1))
-        rangeP1S1 = ((0, court_bottom - 1), (court_r, court_bottom))
-        rangeP1S2 = ((court_l, court_bottom - 1), (0, court_bottom))
-
-        if turn == 1:
-            return mesh_points(rangeP1S1)
-        elif turn == 2:
-            return mesh_points(rangeP1S2)
-        else:
-            return mesh_points(rangeP1)
-
-    def rangeP2(turn):
-        rangeP2 = ((field_l, 1), (field_r, field_top))
-        rangeP2S1 = ((court_l, court_top), (0, court_top + 1))
-        rangeP2S2 = ((0, court_top), (court_r, court_top + 1))
-        if turn == 3:
-            return mesh_points(rangeP2S1)
-        elif turn == 4:
-            return mesh_points(rangeP2S2)
-        else:
-            return mesh_points(rangeP2)
-
-    rangeVZ = (-4, -2, 0, 2, 4, 6, 8, 10)
-
-    actions = []
-    rangeB1 = ((1, 1), (1, 2))
-    if state.turn in (1, 2, 11, 14):  # ユーザー2のターン
-        for xb, yb in rangeB(state.turn):
-            for vz in rangeVZ:
-                if check_ball(state.ball_pos, xb, yb, vz):
-                    for xp1, yp1 in rangeP1(state.turn):
-                        actions.append((xb, yb, vz, xp1, yp1))
-    elif state.turn == 4:
-        for vz in rangeVZ:
-            for ball_target_pos in rangeB1:
-                check_ball(state.ball_pos, ball_target_pos, vz)
-                for xp, yp in rangeP1:
-                    actions.append((tc, xb, yb, vz, xp, yp))
-    return actions
 
 
 def draw_court():
@@ -326,11 +156,37 @@ def draw_court():
         pygame.draw.line(screen, WHITE, start_screen, end_screen, width_screen)
 
 
+# スライダー設定
+slider_length = 150
+slider_height = 10
+slider_x = 50
+z_slider_y = controler_y + 20
+h_slider_y = controler_y + 60
+
+z_slider_val = (ball_vzmax - ball_vzmax) // 2
+h_slider_val = ball_vmax // 2
+
+ok_button_x = slider_x + slider_length + 150
+ok_button_y = controler_y + 20
+
+# draw_slider(slider_x, z_slider_y, z_slider_val, 20, "Z速度")
+# draw_slider(slider_x, h_slider_y, h_slider_val, 40, "水平速度")
+message2 = "プレイ"
+
+
+def AIstart():
+    global ai_result, ai_thinking
+    print("AIstart")
+    # ai_result = minimax(state, MAX_DEPTH, True)
+    ai_thinking = False
+
+
 def initplay():
     global p1_pos, p2_pos, p1_pos_target, p2_pos_target, ball_pos, ball_pos_target
     global current_player, difensive_player, current_ball
     global ball_flying, ball_landing_pos, ball_landing_pos2
     global shot
+    global p1_point, p2_point, p1_games, p2_games, turn
     p1_pos = [0, -11.90]  # 手前
     p2_pos = [0, 11.90]  # 奥
     p1_pos_target = p1_pos[:]
@@ -344,6 +200,19 @@ def initplay():
     ball_landing_pos = None
     ball_landing_pos2 = None
     shot = 0
+    if p1_point >= 4:
+        p1_point = 0
+        p2_point = 0
+        p1_games += 1
+
+    if p2_point >= 4:
+        p1_point = 0
+        p2_point = 0
+        p2_games += 1
+    if p1_games >= 4 or p2_games >= 4:
+        turn = 0
+    else:
+        turn = 22
 
 
 def draw_slider(x, y, value, min_val, max_val, label):
@@ -434,13 +303,13 @@ def draw_candidates(candidate_list, pos, pos_target):
 def check_net(x0, z0):
     # =(1.07-0.914)*abs(x)/5.029
     # =(1.07-0.914)*abs(x)/6.399
-
+    ball = 0.05
     pole = 5.029  # シングルスの場合。ダブルスは6.399
-    if x0 > pole + BALL_RADIUS:
+    if x0 > pole + ball:
         return True
-    if x0 < -pole - BALL_RADIUS:
+    if x0 < -pole - ball:
         return True
-    if z0 > (1.07 - 0.914) * abs(x0) / pole + 0.914 + BALL_RADIUS:
+    if z0 > (1.07 - 0.914) * abs(x0) / pole + 0.914 + ball:
         return True
     return False
 
@@ -495,15 +364,26 @@ def draw_scoreboard():
 
     if turn == 0:
         message = "P1 P2 位置についてださい"
-    elif turn == 11:
-        message = "P1 打ってください"
-    elif turn == 12:
-        message = "P2 取りに行って"
-    elif turn == 13:
-        message = "P2 打ってください"
-    elif turn == 14:
+    elif turn == 2:
+        message = "P2 サーブを打ってください"
+    elif turn == 4:
+        message = "P1 サーブを打ってください"
+
+    elif turn == 11:  # <==4
         message = "P1 取りに行って"
-    elif turn == 20:
+    elif turn == 12:  # <==1
+        message = "P1 打ってください"
+    elif turn == 13:  # <==2
+        message = "P2 取りに行って"
+    elif turn == 14:  # <==3
+        message = "P2 打ってください"
+    elif turn == 20:  # <==5
+        pass
+    elif turn == 21:  # <==5
+        if p1_games >= 4:
+            message = "P1 Win Game End"
+        else:
+            message = "P2 Win Game End"
         pass
     else:
         message = ""
@@ -533,80 +413,70 @@ while True:
 
             # OKボタンクリックでターンを進める（打ち終わり時にのみ）
             if ok_button_rect.collidepoint(mxs, mys):
-                if turn == 11 and ball_landing_pos2:
-                    turn = 12
+                print("turn=", turn, "bal_landing_pos", ball_landing_pos2)
+                if turn in (4, 12) and ball_landing_pos2:
+                    turn = 13
                     p2_pos_target = p2_pos[:]
-                elif turn == 13 and ball_landing_pos2:
-                    turn = 14
+                    # AIstart()
+                elif turn in (2, 14) and ball_landing_pos2:
+                    turn = 11
                     p1_pos_target = p1_pos[:]
-                elif turn == 12 and p2_pos_target:
+                elif turn == 13 and p2_pos_target:
                     print(ball_pos_target)
                     print(ball_pos_target[3])
                     p1_pos_target = adjust_target(
                         p1_pos, p1_pos_target, ball_pos_target[3]
                     )
                     ball_flying = True
-                elif turn == 14 and p1_pos_target:
+                elif turn == 11 and p1_pos_target:
                     p2_pos_target = adjust_target(
                         p2_pos, p2_pos_target, ball_pos_target[3]
                     )
                     ball_flying = True
                 elif turn == 20:
                     initplay()
-                    turn = 0
                 elif turn == 0:
                     ball_landing_pos = None
                     ball_landing_pos2 = None
                     if (p1_games + p2_games) % 2 == 0:
-                        turn = 11
+                        turn = 4
                         current_player = p1_pos[:]
                         difensive_player = p2_pos[:]
                     else:
-                        turn = 13
+                        turn = 2
                         current_player = p1_pos[:]
                         difensive_player = p2_pos[:]
                     ball_pos = [current_player[0], current_player[1], 2.00]
                     ball_pos_target = [current_player[0], current_player[1], 2.00, 0]
                     current_ball = ball_pos[:]
+                print("turn=", turn)
 
             if turn == 0:
                 if (p1_games + p2_games) % 2 == 0:
-                    # プレーヤー1はサービスをする場所を決める
-                    # プレーヤー2は受け取る場所を決める
                     b2 = +1.00
                     t2 = field_top
                     l2 = field_l
                     r2 = field_r
 
+                    b1 = court_bottom - 1
+                    t1 = court_bottom
                     if (p1_point + p2_point) % 2 == 0:
-                        # 下のデュースコートから打つ
-                        b1 = court_bottom - 1
-                        t1 = court_bottom
                         l1 = 0
                         r1 = court_r
                     else:
-                        # 下のアドコートから打つ
-                        b1 = court_bottom - 1
-                        t1 = court_bottom
                         l1 = court_l
                         r1 = 0
                 else:
-                    # プレーヤー2はサービスをする場所を決める
-                    # プレーヤー1は受け取る場所を決める
                     b1 = field_bottom
                     t1 = -1.00
                     l1 = field_l
                     r1 = field_r
+                    b2 = court_top
+                    t2 = court_top + 1
                     if (p1_point + p2_point) % 2 == 0:
-                        # 上のデュースコートから打つ
-                        b2 = court_top
-                        t2 = court_top + 1
                         l2 = court_l
                         r2 = 0
                     else:
-                        # 上のアドコートから打つ
-                        b2 = court_top
-                        t2 = court_top + 1
                         l2 = 0
                         r2 = court_r
 
@@ -620,28 +490,16 @@ while True:
                     p2_pos_target = p2_pos[:]
                     print("set p2_pos")
 
-                # プレーヤー1はサービスをする場所を決める
-                # プレーヤー2は受け取る場所を決める
-
-            if turn == 11:
-                # プレーヤー1は打つ場所と移動先を
-                print("shot", shot)
-                if shot == 0:
-                    # サービス　打つ場所はサービスラインの手前
-                    if (p1_point + p2_point) % 2 == 0:
-                        b = 1.00
-                        t = service_line
-                        l = court_l
-                        r = 0
-                    else:
-                        b = 1.00
-                        t = service_line
-                        l = 0
-                        r = court_r
-                else:
-                    b = 1.00
-                    t = court_top
+            # プレーヤー1はサービスをする場所を決める
+            # プレーヤー2は受け取る場所を決める
+            if turn == 4:
+                if (p1_point + p2_point) % 2 == 0:
+                    t = service_line
                     l = court_l
+                    r = 0
+                else:
+                    t = service_line
+                    l = 0
                     r = court_r
 
                 if my < field_bottom:
@@ -656,26 +514,10 @@ while True:
                 elif field_bottom < my < -1.00:
                     p1_pos_target = [mx, my]
 
-            elif turn == 13:
-                # プレーヤ1のターン
-                if shot == 0:
-                    # サービス　打つ場所はサービスラインの手前
-                    if (p1_point + p2_point) % 2 == 0:
-                        t = -1.00
-                        b = -1 * service_line
-                        l = 0
-                        r = court_r
-                    else:
-                        t = -1.00
-                        b = -1 * service_line
-                        l = court_l
-                        r = 0
-                else:
-                    t = -1.00
-                    b = court_bottom
-                    l = court_l
-                    r = court_r
-
+            elif turn == 2:
+                b = court_bottom
+                l = court_l
+                r = court_r
                 if my < field_bottom:
                     handle_slider_input((mxs, mys))
                 elif b < my < -1.00 and l < mx < r:
@@ -683,7 +525,39 @@ while True:
                 elif 1.00 < my < field_top:
                     p2_pos_target = [mx, my]
 
-            elif turn == 12 and 1.00 < my < field_top:
+            if turn == 12:
+                print("shot", shot)
+
+                t = court_top
+                l = court_l
+                r = court_r
+                b = 1.00
+
+                if my < field_bottom:
+                    handle_slider_input((mxs, mys))
+                elif b < my < t and l < mx < r:
+                    """
+                    プレーヤー1のターン
+                    プレーヤー1はy>0に打つ
+                    プレーヤー1はy<0に移動する
+                    """
+                    ball_landing_pos = (mx, my)
+                elif field_bottom < my < -1.00:
+                    p1_pos_target = [mx, my]
+
+            elif turn == 14:
+                b = court_bottom
+                l = court_l
+                r = court_r
+                t = -1.00
+                if my < field_bottom:
+                    handle_slider_input((mxs, mys))
+                elif b < my < t and l < mx < r:
+                    ball_landing_pos = (mx, my)  # ボールの着地点
+                elif 1.00 < my < field_top:
+                    p2_pos_target = [mx, my]
+
+            elif turn == 13 and 1.00 < my < field_top:
                 # プレーヤー2のターン　取りに行く
                 n = 0
                 for x, y, z, t in ballhit:
@@ -697,8 +571,16 @@ while True:
                     turn = 20
                     message = "プレーヤー1 Point"
                     p1_point += 1
+                    if p1_point >= 4:
+                        p1_point = 0
+                        p2_point = 0
+                        p1_games += 1
+                        message = "プレーヤー1 Get Game"
+                    if p1_games >= 4:
+                        turn = 21
+                        message = "プレーヤー1 Win Game End"
 
-            elif turn == 14 and field_bottom < my < -1.00:
+            elif turn == 11 and field_bottom < my < -1.00:
                 n = 0
                 for x, y, z, t in ballhit:
                     if math.hypot(x - p1_pos[0], y - p1_pos[1]) < player_vmax * t:
@@ -712,6 +594,15 @@ while True:
                     message = "プレーヤー2 Point"
                     p2_point += 1
 
+                    if p2_point >= 4:
+                        p1_point = 0
+                        p2_point = 0
+                        p2_games += 1
+                        message = "プレーヤー2 Game"
+                    if p2_games >= 4:
+                        turn = 21
+                        message = "プレーヤー2 Win Game End"
+
             message2 = "mx=" + f"{mx:.2f}" + "my=" + f"{my:.2f}"
 
     # ボール更新と
@@ -722,13 +613,13 @@ while True:
         ball_pos[2] += ball_vz * 0.02
         ball_vz -= g * 0.02
 
-        if turn in (12, 14):
+        if turn in (13, 11):
             if t > ball_pos_target[3]:
                 t = 0
                 ball_flying = False
         if not ball_flying:
-            if turn == 12:
-                turn = 13
+            if turn == 13:
+                turn = 14
                 ball_landing_pos = None
                 ball_landing_pos2 = None
                 p1_pos = p1_pos_target[:]
@@ -738,8 +629,9 @@ while True:
                 difensive_player = p1_pos[:]
                 current_ball = ball_pos[:]
                 shot += 1
-            elif turn == 14:
-                turn = 11
+            elif turn == 11:
+                # player1が取る位置を決めた後。
+                turn = 12
                 ball_landing_pos = None
                 ball_landing_pos2 = None
                 p1_pos = p1_pos_target[:]
@@ -761,7 +653,7 @@ while True:
         screen,
         RED,
         (int(center_x + p1_pos[0] * scale), int(center_y - p1_pos[1] * scale)),
-        player_radius * scale,
+        player_radius,
     )
     draw_landing_marker(p1_pos_target, RED, cross=True)
 
@@ -770,7 +662,7 @@ while True:
         screen,
         BLACK,
         (int(center_x + p2_pos[0] * scale), int(center_y - p2_pos[1] * scale)),
-        player_radius * scale,
+        player_radius,
     )
     draw_landing_marker(p2_pos_target, BLACK, cross=True)
 
@@ -780,7 +672,7 @@ while True:
             screen,
             YELLOW,
             (int(center_x + ball_pos[0] * scale), int(center_y - ball_pos[1] * scale)),
-            BALL_RADIUS * scale,
+            ball_radius,
         )
 
     if ball_landing_pos:
@@ -858,15 +750,15 @@ while True:
             # ボールの軌跡を表示する。ネットまで
             draw_trajectory(current_player, ball_vx, ball_vy, t0)
 
-    if turn in (11, 13) and ball_landing_pos:
+    if turn in (2, 4, 12, 14) and ball_landing_pos:
         # スライダーを表示する。
         draw_slider(slider_x, z_slider_y, z_slider_val, ball_vzmin, ball_vzmax, "Z速度")
         draw_slider(slider_x, h_slider_y, h_slider_val, 0, ball_vmax, "水平速度")
 
-    if turn == 12:
+    if turn == 13:
         # キャッチできるポイントを表示
         draw_candidates(ballhit, difensive_player, p2_pos_target)
-    if turn == 14:
+    if turn == 11:
         draw_candidates(ballhit, difensive_player, p1_pos_target)
 
     draw_ok_button()  # OKボタンを表示する。
