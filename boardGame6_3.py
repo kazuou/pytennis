@@ -19,13 +19,24 @@ ip_address = socket.gethostbyname(host_name)
 # IPアドレスをドットで分割して、最後の部分を取得
 last_octet = ip_address.split(".")[-1]
 
+
 print(f"最後のIPアドレスの数字は: {last_octet}")
 
 # if socket.gethostname() == "Cortina.local":
 # if host_name == "Cortina.local":
-if "Cortina" in host_name:
-    fontname = "ヒラキノ角コシックw3"
+keywords = ("Coltina", "Anber", "Wimbledon")
+keywords2 = "Candace"
+
+if any(keyword in host_name for keyword in keywords):
+    print("in Cortina")
+    # filename = "FontPygame72"
+    fontname = "ヒラキノ角コシックw5"
+elif any(keyword in host_name for keyword in keywords2):
+    print("in candace")
+    last_octet = 74
+    fontname = "notosansmonocjkjp"
 else:
+    # filename = "FontPygame"
     fontname = "yugothic"
 
 # 初期化
