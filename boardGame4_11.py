@@ -3,10 +3,6 @@ import sys
 import math
 import socket
 
-# from core.status import GameState
-from core.judge import adjust_target
-import config
-
 
 def rgb(r, g, b):
     return (r, g, b)
@@ -15,19 +11,12 @@ def rgb(r, g, b):
 # 自分のホスト名からIPアドレスを取得
 host_name = socket.gethostname()
 ip_address = socket.gethostbyname(host_name)
-
 print(host_name)
-
 # IPアドレスをドットで分割して、最後の部分を取得
 last_octet = ip_address.split(".")[-1]
 
-
-print(f"最後のIPアドレスの数字は: {last_octet}")
-
 # if socket.gethostname() == "Cortina.local":
 # if host_name == "Cortina.local":
-
-
 keyword72 = "Coltina"
 keywords = {
     "Candace": ("notosansmonocjkjp",74),
@@ -48,7 +37,6 @@ else:
 
 print(f"最後のIPアドレスの数字は: {last_octet}")
 print("font=",fontname)
-
 # 初期化
 pygame.init()
 info = pygame.display.Info()
@@ -56,7 +44,7 @@ screen_width = info.current_w
 screen_height = info.current_h
 print("screen size=", screen_width, screen_height)
 
-# スケーリング
+# スケーリング倍率
 scale = 20
 field_width = int(20.97 * scale)
 field_height = int(33.79 * scale)
@@ -112,7 +100,7 @@ p1_pos = [0, -11.90]  # 手前
 p2_pos = [0, 11.90]  # 奥
 p1_pos_target = p1_pos[:]
 p2_pos_target = p2_pos[:]
-# player_vmax = 5
+player_vmax = 5
 PLAYER_REACH = 1
 
 # field_width = int(2097 * scale)
@@ -150,32 +138,6 @@ shot = 0
 coartChange = 0
 
 
-# スライダー設定
-slider_length = 150
-slider_height = 10
-slider_x = 50
-z_slider_y = controler_y + 20
-# h_slider_y = controler_y + 60
-
-z_slider_val = (ball_vzmax - ball_vzmax) // 2
-# h_slider_val = ball_vmax // 2
-
-ok_button_x = slider_x + slider_length + 150
-ok_button_y = controler_y + 10
-
-# draw_slider(slider_x, z_slider_y, z_slider_val, 20, "Z速度")
-# draw_slider(slider_x, h_slider_y, h_slider_val, 40, "水平速度")
-message2 = "プレイ"
-
-
-class Action:
-    def __init__(self, hitpoint, ball_landing_pos, vz, target_pos):
-        self.hitpoint = hitpoint  # [x, y, z, t]
-        self.ball_landing_pos = ball_landing_pos  # [x, y]
-        self.vz = vz
-        self.target_pos = target_pos  # [x, y]
-
-
 def draw_court():
     lines = (
         ((-5.485, 11.895), (5.485, 11.895), 0.10),  # ベースライン
@@ -210,6 +172,24 @@ def draw_court():
         )
         width_screen = round(width * scale)
         pygame.draw.line(screen, WHITE, start_screen, end_screen, width_screen)
+
+
+# スライダー設定
+slider_length = 150
+slider_height = 10
+slider_x = 50
+z_slider_y = controler_y + 20
+# h_slider_y = controler_y + 60
+
+z_slider_val = (ball_vzmax - ball_vzmax) // 2
+# h_slider_val = ball_vmax // 2
+
+ok_button_x = slider_x + slider_length + 150
+ok_button_y = controler_y + 10
+
+# draw_slider(slider_x, z_slider_y, z_slider_val, 20, "Z速度")
+# draw_slider(slider_x, h_slider_y, h_slider_val, 40, "水平速度")
+message2 = "プレイ"
 
 
 def AIstart():
@@ -329,7 +309,7 @@ def draw_candidates(candidate_list, pos, pos_target):
     for x, y, z, t in candidate_list:
         xs = center_x + x * scale
         ys = center_y - y * scale
-        if math.hypot(x - pos[0], y - pos[1]) < config.PLAYER_VMAX * t+ PLAYER_REACH:
+        if math.hypot(x - pos[0], y - pos[1]) < player_vmax * t + PLAYER_REACH:
             if math.hypot(x - pos_target[0], y - pos_target[1]) < 0.1:
                 pygame.draw.line(screen, RED, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
                 pygame.draw.line(screen, RED, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
@@ -372,6 +352,20 @@ def check_net(x0, z0):
     if z0 > (1.07 - 0.914) * abs(x0) / pole + 0.914 + ball + margin:
         return True
     return False
+
+
+def adjust_target(p_pos, p_pos_target, time_limit):
+    x1, y1 = p_pos
+    x2, y2 = p_pos_target
+    distance = math.hypot(x2 - x1, y2 - y1)
+    max_distance = player_vmax * time_limit
+    if distance <= max_distance:
+        return [x2, y2]  # リスト形式で返却
+    else:
+        ratio = max_distance / distance
+        new_x = x1 + (x2 - x1) * ratio
+        new_y = y1 + (y2 - y1) * ratio
+        return [new_x, new_y]
 
 
 def draw_trajectory(start_pos, vx, vy, vz, tbound, tend):
@@ -490,23 +484,20 @@ while True:
                     ball_landing_pos = None
                     ball_landing_pos2 = None
                     if (p1_games + p2_games) % 2 == 0:
-                        turn = 4  # player1 service
+                        turn = 4
                         current_player = p1_pos[:]
                         difensive_player = p2_pos[:]
                     else:
-                        turn = 2  # player2 service
+                        turn = 2
                         current_player = p2_pos[:]
                         difensive_player = p1_pos[:]
                     ball_pos = [current_player[0], current_player[1], 2.00]
                     ball_pos_target = [current_player[0], current_player[1], 2.00, 0]
                     current_ball = ball_pos[:]
                 print("turn=", turn)
-
             MARGIN_LINE=0.5
             if turn == 0:
                 if (p1_games + p2_games) % 2 == 0:
-                    # プレーヤー1はサービスをする場所を決める
-                    # プレーヤー2は受け取る場所を決める
                     b2 = +1.00
                     t2 = field_top
                     l2 = field_l
@@ -521,13 +512,10 @@ while True:
                         l1 = court_l
                         r1 = 0
                 else:
-                    # プレーヤー2はサービスをする場所を決める
-                    # プレーヤー1は受け取る場所を決める
                     b1 = field_bottom
                     t1 = -1.00
                     l1 = field_l
                     r1 = field_r
-
                     b2 = court_top
                     t2 = court_top + 1
                     if (p1_point + p2_point) % 2 == 0:
@@ -547,8 +535,9 @@ while True:
                     p2_pos_target = p2_pos[:]
                     print("set p2_pos")
 
+            # プレーヤー1はサービスをする場所を決める
+            # プレーヤー2は受け取る場所を決める
             if turn == 4:
-                # プレーヤー1はサービスを打つ場所と移動先を指定する。
                 if (p1_point + p2_point) % 2 == 0:
                     t1 = service_line
                     b1 = 1.00
@@ -629,7 +618,7 @@ while True:
                 for x, y, z, t in ballhit:
                     if (
                         math.hypot(x - p2_pos[0], y - p2_pos[1])
-                        < config.PLAYER_VMAX * t + PLAYER_REACH
+                          < player_vmax * t + PLAYER_REACH
                     ):
                         n = n + 1
                         if math.hypot(mx - x, my - y) < 0.5:
@@ -654,7 +643,7 @@ while True:
                 for x, y, z, t in ballhit:
                     if (
                         math.hypot(x - p1_pos[0], y - p1_pos[1])
-                        < config.PLAYER_VMAX * t + PLAYER_REACH
+                        < player_vmax * t + PLAYER_REACH
                     ):
                         n = n + 1
                         if math.hypot(mx - x, my - y) < 0.5:
