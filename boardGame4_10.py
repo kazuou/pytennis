@@ -11,33 +11,32 @@ def rgb(r, g, b):
 # 自分のホスト名からIPアドレスを取得
 host_name = socket.gethostname()
 ip_address = socket.gethostbyname(host_name)
-
+print(host_name)
 # IPアドレスをドットで分割して、最後の部分を取得
 last_octet = ip_address.split(".")[-1]
 
 # if socket.gethostname() == "Cortina.local":
 # if host_name == "Cortina.local":
-keywords = "Coltina"
-keywords2 = "Candace"
-keywords3 = "Amber"
+keyword72 = "Coltina"
+keywords = {
+    "Candace": ("notosansmonocjkjp",74),
+    "Amber": ("msgothic",83),
+    "W10029376A": ("yumincho", 70)
+}
 
-if any(keyword in host_name for keyword in keywords):
+if keyword72 in host_name:
     print("in Cortina")
     # filename = "FontPygame72"
     fontname = "ヒラキノ角コシックw5"
-elif host_name in keywords2:
-    print("in candace")
-    last_octet = 74
-    fontname = "notosansmonocjkjp"
-elif host_name in keywords3:
-    print("in Amber")
-    fontname = "msgothic"
+elif (keyword := keywords.get(host_name)) is not None:
+    fontname = keyword[0] 
+    last_octet = keyword[1]
 else:
     # filename = "FontPygame"
-    fontname = "yugothic"
+    fontname = "notosansmonocjkjp"
 
 print(f"最後のIPアドレスの数字は: {last_octet}")
-
+print("font=",fontname)
 # 初期化
 pygame.init()
 info = pygame.display.Info()
@@ -770,7 +769,8 @@ while True:
                 current_ball[1] + ball_vy * t_flight2,
             )
 
-            for i in range(3, 20):
+            # for i in range(3, 20):
+            for i in range(3,20):
                 z = i * 0.1
 
                 b = -ball_vz
@@ -796,7 +796,8 @@ while True:
                     t1 = (-b - sqrt_d) / (2 * a) + t_flight  # 上昇時
                     x1 = current_ball[0] + ball_vx * t1
                     y1 = current_ball[1] + ball_vy * t1
-                    ballhit.append((x1, y1, z, t1))
+                    if z>0.49 or shot >= 1:
+                        ballhit.append((x1, y1, z, t1))
                     t2 = (-b + sqrt_d) / (2 * a) + t_flight  # 下降時
                     x2 = current_ball[0] + ball_vx * t2
                     y2 = current_ball[1] + ball_vy * t2
