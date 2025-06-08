@@ -4,28 +4,36 @@ import math
 import socket
 from enum import Enum
 
+
 class Character:
     """キャラクターーオブジェクト"""
-    def __init__(self,image_type):
+
+    def __init__(self, image_type):
         self.status = 0
         self.x = 0
         self.y = 0
         self.z = 0
         self.width = 0
         self.height = 0
-        self.mag = 1 #サイズと表示の倍率(ボールを大きく見せるため)
-        self.color = (255,255,255)
-        # self.image = pygame.image.load("man1.png")
- 
-    #表示オン
+        self.mag = 1  # サイズと表示の倍率(ボールを大きく見せるため)
+
+        if image_type == 1:
+            self.color = (255, 255, 255)
+            self.image = pygame.image.load(".old/images/man1.png")
+        if image_type == 2:
+            self.color = (255, 255, 255)
+            self.image = pygame.image.load(".old/images/man1.png")
+
+    # 表示オン
     def on(self, image_type):
         self.status = 1
 
+
 # 状態クラス
 class GameState:
-    def __init__(self, ball_pos,  player1_pos, player2_pos, turn):
+    def __init__(self, ball_pos, player1_pos, player2_pos, turn):
         self.ball_pos = ball_pos
-        self.ball_vz = 0 # ボールの速度ベクトル
+        self.ball_vz = 0  # ボールの速度ベクトル
         self.ball_landing_pos = None
         self.p1_pos = player1_pos
         self.p2_pos = player2_pos
@@ -57,14 +65,15 @@ class GameType(Enum):
     @property
     def court_r(self):
         return 4.115 if self == GameType.SINGLES else 5.485
-    
+
     @property
     def pole(self):
         return 5.029 if self == GameType.SINGLES else 6.399
         # シングルスの場合。ダブルスは6.399
-    
 
-gt = GameType.SINGLES  # または GameType.DOUBLES
+
+# gt = GameType.SINGLES  # または GameType.DOUBLES
+gt = GameType.DOUBLES  # または GameType.DOUBLES
 
 
 def rgb(r, g, b):
@@ -80,11 +89,11 @@ last_octet = ip_address.split(".")[-1]
 
 # if socket.gethostname() == "Cortina.local":
 # if host_name == "Cortina.local":
-keyword72 = "Coltina"
+keyword72 = "Cortina"
 keywords = {
-    "Candace": ("notosansmonocjkjp",74),
-    "Amber": ("msgothic",83),
-    "W10029376A": ("yumincho", 70)
+    "Candace": ("notosansmonocjkjp", 74),
+    "Amber": ("msgothic", 83),
+    "W10029376A": ("yumincho", 70),
 }
 
 if keyword72 in host_name:
@@ -92,14 +101,14 @@ if keyword72 in host_name:
     # filename = "FontPygame72"
     fontname = "ヒラキノ角コシックw5"
 elif (keyword := keywords.get(host_name)) is not None:
-    fontname = keyword[0] 
+    fontname = keyword[0]
     last_octet = keyword[1]
 else:
     # filename = "FontPygame"
     fontname = "notosansmonocjkjp"
 
 print(f"最後のIPアドレスの数字は: {last_octet}")
-print("font=",fontname)
+print("font=", fontname)
 # 初期化
 pygame.init()
 info = pygame.display.Info()
@@ -156,7 +165,7 @@ field_top = (center_y - 100) / scale
 field_l = -16.89
 field_r = 16.89
 
-MARGIN_NET = 0.5
+MARGIN_NET = 0.1
 MARGIN_LINE = 0.5
 
 
@@ -166,10 +175,10 @@ p1_pos = [0, -11.90]  # 手前
 p2_pos = [0, 11.90]  # 奥
 p1_pos_target = p1_pos[:]
 p2_pos_target = p2_pos[:]
-p1B_pos = [-5, -11.90]  # 手前
-p2B_pos = [+5, 11.90]  # 奥
-p1B_pos_target = p1_pos[:]
-p2B_pos_target = p2_pos[:]
+p1b_pos = p1_pos[:]  # 手前
+p2b_pos = p2_pos[:]  # 奥
+p1b_pos_target = p1_pos[:]
+p2b_pos_target = p2_pos[:]
 
 PLAYER_VMAX = 5
 PLAYER_REACH = 1
@@ -179,7 +188,8 @@ PLAYER_REACH = 1
 # field_height = int(3379 * scale)
 # controler_height = 100
 ballhit = []
-
+ballcatch = []
+ballcatchb = []
 
 # ボール設定
 BALL_RADIUS = 0.05
@@ -207,6 +217,7 @@ p2_point = 0
 p1_games = 0
 p2_games = 0
 shot = 0
+
 
 def draw_court():
     lines = (
@@ -408,12 +419,13 @@ def check_net1(current_ball, ball_landing_pos, z_slider_val):
     x0 = current_ball[0] + ball_vx * t0
     return check_net(x0, z0)
 
+
 def check_net(x0, z0):
     # =(1.07-0.914)*abs(x)/5.029
     # =(1.07-0.914)*abs(x)/6.399
     # BALL_RADIUS = 0.05
     # pole = 5.029  # シングルスの場合。ダブルスは6.399 gt.pole
-
+    print(x0, z0, gt.pole)
     if x0 > gt.pole + BALL_RADIUS:
         return True
     if x0 < -gt.pole - BALL_RADIUS:
@@ -480,8 +492,12 @@ def draw_scoreboard():
         message = "P1 P2 位置についてださい"
     elif turn == 2:
         message = "P2 サーブを打ってください"
+    elif turn == 3:
+        message = "P1 取りに行ってください"
     elif turn == 4:
         message = "P1 サーブを打ってください"
+    elif turn == 5:
+        message = "P2 取りに行ってください"
 
     elif turn == 11:  # <==4
         message = "P1 取りに行って"
@@ -507,6 +523,100 @@ def draw_scoreboard():
 
     msg_surface = msg_font.render(message2, True, BLACK)
     screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 65))
+
+
+def checkball_hit(ball_landing_pos, turn):
+    # netは超えている
+    global ballhit, ballcatch, ballcatchb
+    dx = ball_landing_pos[0] - current_ball[0]
+    dy = ball_landing_pos[1] - current_ball[1]
+
+    t_flight = (z_slider_val + math.sqrt(z_slider_val**2 + 2 * g * current_ball[2])) / g
+
+    ball_vx = dx / t_flight
+    ball_vy = dy / t_flight
+    ball_vz = z_slider_val
+
+    # y=0の時間
+    t0 = -current_ball[1] / ball_vy
+    a = 0.5 * g
+    z0 = current_ball[2] + ball_vz * t0 - a * t0 * t0
+    x0 = current_ball[0] + ball_vx * t0
+    ballhit = []
+    ballcatch = []
+    ballcatchb = []
+    if check_net(x0, z0):
+        v_land = ball_vz - g * t_flight  # 着地時の速度（負の値）
+        v_rebound = -v_land * 0.8  # 跳ね返り初速（正の値）
+
+        # t_bounce = 2 * v_rebound / g  # 上下で対称な時間（頂点までと落下）
+        # t_flight2 = t_flight + t_bounce  # 2回目の着地時刻
+
+        # ball_landing_pos2 = (
+        #    current_ball[0] + ball_vx * t_flight2,
+        #    current_ball[1] + ball_vy * t_flight2,
+        # )
+
+        for i in range(3, 20):
+            z = i * 0.1
+
+            b = -ball_vz
+            c = z - current_ball[2]
+            discriminant = b**2 - 4 * a * c
+            if discriminant > 0 and turn >= 10:
+                sqrt_d = math.sqrt(discriminant)
+                t1 = (-b - sqrt_d) / (2 * a)  # 上昇時
+                if t1 > t0:
+                    x1 = current_ball[0] + ball_vx * t1
+                    y1 = current_ball[1] + ball_vy * t1
+                    ballhit.append((x1, y1, z, t1))
+                t2 = (-b + sqrt_d) / (2 * a)  # 下降時
+                if t2 > t0:
+                    x2 = current_ball[0] + ball_vx * t2
+                    y2 = current_ball[1] + ball_vy * t2
+                    ballhit.append((x2, y2, z, t2))
+            b = -v_rebound
+            c = z  # 高さ0からの2バウンド目
+            discriminant = b**2 - 4 * a * c
+            if discriminant > 0:
+                sqrt_d = math.sqrt(discriminant)
+                t1 = (-b - sqrt_d) / (2 * a) + t_flight  # 上昇時
+                x1 = current_ball[0] + ball_vx * t1
+                y1 = current_ball[1] + ball_vy * t1
+                if z > 0.49 or shot >= 1:
+                    ballhit.append((x1, y1, z, t1))
+                t2 = (-b + sqrt_d) / (2 * a) + t_flight  # 下降時
+                x2 = current_ball[0] + ball_vx * t2
+                y2 = current_ball[1] + ball_vy * t2
+                ballhit.append((x2, y2, z, t2))
+        # 4つ目の値（index 3）でソート
+        ballhit = sorted(ballhit, key=lambda x: x[3])
+        if turn in (4, 12):  # p1打ってください
+            for x, y, z, t in ballhit:
+                if (
+                    math.hypot(x - p2_pos[0], y - p2_pos[1])
+                    < PLAYER_VMAX * t + PLAYER_REACH
+                ):
+                    ballcatch.append((x, y, z, t))
+
+                if (
+                    math.hypot(x - p2b_pos[0], y - p2b_pos[1])
+                    < PLAYER_VMAX * t + PLAYER_REACH
+                ):
+                    ballcatchb.append((x, y, z, t))
+        if turn in (2, 14):  # p2 打ってください
+            for x, y, z, t in ballhit:
+                if (
+                    math.hypot(x - p1_pos[0], y - p1_pos[1])
+                    < PLAYER_VMAX * t + PLAYER_REACH
+                ):
+                    ballcatch.append((x, y, z, t))
+
+                if (
+                    math.hypot(x - p1b_pos[0], y - p1b_pos[1])
+                    < PLAYER_VMAX * t + PLAYER_REACH
+                ):
+                    ballcatchb.append((x, y, z, t))
 
 
 # メインループ
@@ -596,12 +706,20 @@ while True:
 
                 print("t2,my,b2=", t2, my, b2, l2, mx, r2)
                 if t1 > my > b1 and l1 < mx < r1:
-                    p1_pos = [mx, my]
-                    p1_pos_target = p1_pos[:]
+                    if event.button == 3 and gt == GameType.DOUBLES:
+                        p1b_pos = [mx, my]
+                        p1b_pos_target = p1b_pos[:]
+                    else:
+                        p1_pos = [mx, my]
+                        p1_pos_target = p1_pos[:]
                     print("set p1_pos")
                 elif t2 > my > b2 and l2 < mx < r2:
-                    p2_pos = [mx, my]
-                    p2_pos_target = p2_pos[:]
+                    if event.button == 3 and gt == GameType.DOUBLES:
+                        p2b_pos = [mx, my]
+                        p2b_pos_target = p1b_pos[:]
+                    else:
+                        p2_pos = [mx, my]
+                        p2_pos_target = p2_pos[:]
                     print("set p2_pos")
 
             # プレーヤー1はサービスをする場所を決める
@@ -649,7 +767,7 @@ while True:
                 elif 1.00 < my < field_top:
                     p2_pos_target = [mx, my]
 
-            if turn == 12:
+            elif turn == 12:
                 print("shot", shot)
 
                 t1 = court_top - MARGIN_LINE
@@ -687,7 +805,7 @@ while True:
                 for x, y, z, t in ballhit:
                     if (
                         math.hypot(x - p2_pos[0], y - p2_pos[1])
-                          < PLAYER_VMAX * t + PLAYER_REACH
+                        < PLAYER_VMAX * t + PLAYER_REACH
                     ):
                         n = n + 1
                         if math.hypot(mx - x, my - y) < 0.5:
@@ -719,6 +837,7 @@ while True:
                             p1_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
                             break
+
                 if n == 0:
                     turn = 20
                     message = "プレーヤー2 Point"
@@ -778,13 +897,22 @@ while True:
     # コート描画
     draw_court()
 
-    # プレーヤー2描画
+    # プレーヤー1描画
     pygame.draw.circle(
         screen,
         RED,
         (int(center_x + p1_pos[0] * scale), int(center_y - p1_pos[1] * scale)),
         player_radius,
     )
+
+    if gt == GameType.DOUBLES:
+        pygame.draw.circle(
+            screen,
+            RED,
+            (int(center_x + p1b_pos[0] * scale), int(center_y - p1b_pos[1] * scale)),
+            player_radius,
+            width=2,
+        )
     draw_landing_marker(p1_pos_target, RED, cross=True)
 
     # プレーヤー2描画
@@ -794,6 +922,15 @@ while True:
         (int(center_x + p2_pos[0] * scale), int(center_y - p2_pos[1] * scale)),
         player_radius,
     )
+    if gt == GameType.DOUBLES:
+        pygame.draw.circle(
+            screen,
+            BLACK,
+            (int(center_x + p2b_pos[0] * scale), int(center_y - p2b_pos[1] * scale)),
+            player_radius,
+            width=2,
+        )
+
     draw_landing_marker(p2_pos_target, BLACK, cross=True)
 
     if ball_flying:
@@ -802,8 +939,8 @@ while True:
             screen,
             YELLOW,
             (int(center_x + ball_pos[0] * scale), int(center_y - ball_pos[1] * scale)),
-            BALL_RADIUS * 4 * scale, #*4は少し大きく描く
-        ) 
+            BALL_RADIUS * 4 * scale,  # *4は少し大きく描く
+        )
 
     if ball_landing_pos:
         dx = ball_landing_pos[0] - current_ball[0]
@@ -861,7 +998,7 @@ while True:
                     t1 = (-b - sqrt_d) / (2 * a) + t_flight  # 上昇時
                     x1 = current_ball[0] + ball_vx * t1
                     y1 = current_ball[1] + ball_vy * t1
-                    if z>0.49 or shot >= 1:
+                    if z > 0.49 or shot >= 1:
                         ballhit.append((x1, y1, z, t1))
                     t2 = (-b + sqrt_d) / (2 * a) + t_flight  # 下降時
                     x2 = current_ball[0] + ball_vx * t2
@@ -888,10 +1025,10 @@ while True:
         draw_slider(slider_x, z_slider_y, z_slider_val, BALL_VZMIN, BALL_VZMAX, "Z速度")
         # draw_slider(slider_x, h_slider_y, h_slider_val, 0, ball_vmax, "水平速度")
 
-    if turn == 13:
+    if turn in (13, 5):
         # キャッチできるポイントを表示
         draw_candidates(ballhit, difensive_player, p2_pos_target)
-    if turn == 11:
+    if turn in (11, 3):
         draw_candidates(ballhit, difensive_player, p1_pos_target)
 
     draw_ok_button()  # OKボタンを表示する。
