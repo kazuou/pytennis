@@ -31,7 +31,7 @@ class Character:
 
 # 状態クラス
 class GameState:
-    def __init__(self, ball_pos, player1_pos, player2_pos, turn):
+    def __init__(self, ball_pos, player1_pos, player2_pos, turn,player1B_pos = None,player2B_pos = Non):
         self.ball_pos = ball_pos
         self.ball_vz = 0  # ボールの速度ベクトル
         self.ball_landing_pos = None
@@ -39,9 +39,15 @@ class GameState:
         self.p2_pos = player2_pos
         self.p1_pos_target = p1_pos[:]
         self.p2_pos_target = p2_pos[:]
-        self.p1B_pos = p1_pos[:]
-        self.p2B_pos = p2_pos[:]
+        if(player1B_pos == None):
+            self.p1B_pos = p1_pos[:]
+        else :
+            self.p1B_pos = player1B_pos
         self.p1B_pos_target = p1_pos[:]
+        if(player2B_pos == None):
+            self.p2B_pos = p2_pos[:]
+        else :
+            self.p2B_pos = player2B_pos
         self.p2B_pos_target = p2_pos[:]
         # ball_landing_pos2 = None
         self.turn = turn
@@ -53,7 +59,7 @@ class GameType(Enum):
     # gt = GameType.DOUBLE gtはgame_typeの略
     # print(game_type.name)  # "DOUBLES"
     # print(game_type.value) # 2
-    # if gametype = gt.SINGLES:
+    # if gt == GameType.SINGLES:
 
     # gt = GameType.DOUBLE gtはgame_typeの略
     # print(gt.sidelin_r) = 5.48 or 4.11
