@@ -39,14 +39,14 @@ class GameState:
         self.p2_pos = player2_pos
         self.p1_pos_target = p1_pos[:]
         self.p2_pos_target = p2_pos[:]
-        if(player1B_pos == None):
+        if(player1B_pos is None):
             self.p1B_pos = p1_pos[:]
-        else :
+        else:
             self.p1B_pos = player1B_pos
         self.p1B_pos_target = p1_pos[:]
-        if(player2B_pos == None):
+        if(player2B_pos is None):
             self.p2B_pos = p2_pos[:]
-        else :
+        else:
             self.p2B_pos = player2B_pos
         self.p2B_pos_target = p2_pos[:]
         # ball_landing_pos2 = None
@@ -287,7 +287,8 @@ def AIstart():
 
 
 def initplay():
-    global p1_pos, p2_pos, p1_pos_target, p2_pos_target, ball_pos, ball_pos_target
+    global p1_pos, p2_pos, p1_pos_target, p2_pos_target
+    global ball_pos, ball_pos_target
     global current_player, difensive_player, current_ball
     global ball_flying, ball_landing_pos, ball_landing_pos2
     global shot
@@ -531,7 +532,7 @@ def draw_scoreboard():
     screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 65))
 
 
-def checkball_hit(ball_landing_pos, turn):
+def checkball_hit(current_ball,ball_landing_pos, turn):
     # netは超えている
     global ballhit, ballcatch, ballcatchb
     dx = ball_landing_pos[0] - current_ball[0]
@@ -597,6 +598,7 @@ def checkball_hit(ball_landing_pos, turn):
                 ballhit.append((x2, y2, z, t2))
         # 4つ目の値（index 3）でソート
         ballhit = sorted(ballhit, key=lambda x: x[3])
+
         if turn in (4, 12):  # p1打ってください
             for x, y, z, t in ballhit:
                 if (
