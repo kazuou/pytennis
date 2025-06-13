@@ -31,7 +31,15 @@ class Character:
 
 # 状態クラス
 class GameState:
-    def __init__(self, ball_pos, player1_pos, player2_pos, turn,player1B_pos = None,player2B_pos = Non):
+    def __init__(
+        self,
+        ball_pos,
+        player1_pos,
+        player2_pos,
+        turn,
+        player1B_pos=None,
+        player2B_pos=None,
+    ):
         self.ball_pos = ball_pos
         self.ball_vz = 0  # ボールの速度ベクトル
         self.ball_landing_pos = None
@@ -39,12 +47,12 @@ class GameState:
         self.p2_pos = player2_pos
         self.p1_pos_target = p1_pos[:]
         self.p2_pos_target = p2_pos[:]
-        if(player1B_pos is None):
+        if player1B_pos is None:
             self.p1B_pos = p1_pos[:]
         else:
             self.p1B_pos = player1B_pos
         self.p1B_pos_target = p1_pos[:]
-        if(player2B_pos is None):
+        if player2B_pos is None:
             self.p2B_pos = p2_pos[:]
         else:
             self.p2B_pos = player2B_pos
@@ -470,7 +478,8 @@ def draw_trajectory(start_pos, vx, vy, vz, tbound, tend):
         if t < tbound:
             z = start_pos[2] + vz * t - 0.5 * g * t**2
         else:
-            z = -(vz - g * tbound) * 0.8 * (t - tbound) - 0.5 * g * (t - tbound) ** 2
+            z = -(vz - g * tbound) * 0.8 * (t - tbound)
+            -0.5 * g * (t - tbound) ** 2
         x = center_x + (start_pos[0] + vx * t + z * 1.0) * scale
         y = center_y - (start_pos[1] + vy * t + z * 1.0) * scale
         path.append((int(x), int(y)))
@@ -489,10 +498,13 @@ def draw_scoreboard():
     global message2
     font = pygame.font.SysFont("Arial", 24)
 
-    score_text = f"P1: {format_point(p1_point)} ({p1_games})  -  P2: {format_point(p2_point)} ({p2_games})"
+    score_text = (
+        f"P1: {format_point(p1_point)} ({p1_games})  -  "
+        f"P2: {format_point(p2_point)} ({p2_games})"
+    )
+
     score_surface = font.render(score_text, True, BLUE)
     screen.blit(score_surface, (field_width // 2 - score_surface.get_width() // 2, 10))
-
     msg_font = pygame.font.SysFont(fontname, 18)
 
     if turn == 0:
@@ -527,12 +539,11 @@ def draw_scoreboard():
 
     msg_surface = msg_font.render(message, True, BLACK)
     screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 45))
-
     msg_surface = msg_font.render(message2, True, BLACK)
     screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 65))
 
 
-def checkball_hit(current_ball,ball_landing_pos, turn):
+def checkball_hit(current_ball, ball_landing_pos, turn):
     # netは超えている
     global ballhit, ballcatch, ballcatchb
     dx = ball_landing_pos[0] - current_ball[0]
