@@ -17,11 +17,11 @@ last_octet = ip_address.split(".")[-1]
 
 # if socket.gethostname() == "Cortina.local":
 # if host_name == "Cortina.local":
-keyword72 = "Coltina"
+keyword72 = "Cortina"
 keywords = {
-    "Candace": ("notosansmonocjkjp",74),
-    "Amber": ("msgothic",83),
-    "W10029376A": ("yumincho", 70)
+    "Candace": ("notosansmonocjkjp", 74),
+    "Amber": ("msgothic", 83),
+    "W10029376A": ("yumincho", 70),
 }
 
 if keyword72 in host_name:
@@ -29,14 +29,14 @@ if keyword72 in host_name:
     # filename = "FontPygame72"
     fontname = "ヒラキノ角コシックw5"
 elif (keyword := keywords.get(host_name)) is not None:
-    fontname = keyword[0] 
+    fontname = keyword[0]
     last_octet = keyword[1]
 else:
     # filename = "FontPygame"
     fontname = "notosansmonocjkjp"
 
 print(f"最後のIPアドレスの数字は: {last_octet}")
-print("font=",fontname)
+print("font=", fontname)
 # 初期化
 pygame.init()
 info = pygame.display.Info()
@@ -344,7 +344,7 @@ def check_net(x0, z0):
     # =(1.07-0.914)*abs(x)/6.399
     ball = 0.05
     pole = 5.029  # シングルスの場合。ダブルスは6.399
-    margin = 0.5
+    margin = 0.1
     if x0 > pole + ball:
         return True
     if x0 < -pole - ball:
@@ -401,7 +401,11 @@ def draw_scoreboard():
     global message2
     font = pygame.font.SysFont("Arial", 24)
 
-    score_text = f"P1: {format_point(p1_point)} ({p1_games})  -  P2: {format_point(p2_point)} ({p2_games})"
+    score_text = (
+        f"P1: {format_point(p1_point)} ({p1_games})"
+        + " - "
+        + f"P2: {format_point(p2_point)} ({p2_games})"
+    )
     score_surface = font.render(score_text, True, BLUE)
     screen.blit(score_surface, (field_width // 2 - score_surface.get_width() // 2, 10))
 
@@ -495,7 +499,7 @@ while True:
                     ball_pos_target = [current_player[0], current_player[1], 2.00, 0]
                     current_ball = ball_pos[:]
                 print("turn=", turn)
-            MARGIN_LINE=0.5
+            MARGIN_LINE = 0.5
             if turn == 0:
                 if (p1_games + p2_games) % 2 == 0:
                     b2 = +1.00
@@ -618,7 +622,7 @@ while True:
                 for x, y, z, t in ballhit:
                     if (
                         math.hypot(x - p2_pos[0], y - p2_pos[1])
-                          < player_vmax * t + PLAYER_REACH
+                        < player_vmax * t + PLAYER_REACH
                     ):
                         n = n + 1
                         if math.hypot(mx - x, my - y) < 0.5:
@@ -792,7 +796,7 @@ while True:
                     t1 = (-b - sqrt_d) / (2 * a) + t_flight  # 上昇時
                     x1 = current_ball[0] + ball_vx * t1
                     y1 = current_ball[1] + ball_vy * t1
-                    if z>0.49 or shot >= 1:
+                    if z > 0.49 or shot >= 1:
                         ballhit.append((x1, y1, z, t1))
                     t2 = (-b + sqrt_d) / (2 * a) + t_flight  # 下降時
                     x2 = current_ball[0] + ball_vx * t2
