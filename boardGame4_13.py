@@ -400,21 +400,29 @@ def draw_landing_marker(pos, COLOR, cross=False):
             pygame.draw.line(screen, COLOR, (xs, ys - 5), (xs, ys + 5), 2)
 
 
-def draw_candidates(candidate_list, pos, pos_target):
+def draw_candidates(candidate_list, ballcatch, ballcatchb, pos_target):
     """ボールを受け取る場所をxで表示"""
+
     for x, y, z, t in candidate_list:
         xs = center_x + x * scale
         ys = center_y - y * scale
-        if math.hypot(x - pos[0], y - pos[1]) < PLAYER_VMAX * t + PLAYER_REACH:
-            if math.hypot(x - pos_target[0], y - pos_target[1]) < 0.1:
-                pygame.draw.line(screen, RED, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-                pygame.draw.line(screen, RED, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
-            else:
-                pygame.draw.line(screen, BLACK, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-                pygame.draw.line(screen, BLACK, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
-        else:
-            pygame.draw.line(screen, GRAY2, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-            pygame.draw.line(screen, GRAY2, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
+        pygame.draw.line(screen, GRAY2, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
+        pygame.draw.line(screen, GRAY2, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
+
+    for x, y, z, t in ballcatch:
+        xs = center_x + x * scale
+        ys = center_y - y * scale
+        pygame.draw.line(screen, BLACK, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
+        pygame.draw.line(screen, BLACK, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
+        if math.hypot(x - pos_target[0], y - pos_target[1]) < 0.1:
+            pygame.draw.line(screen, RED, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
+            pygame.draw.line(screen, RED, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
+
+    for x, y, z, t in ballcatchb:
+        xs = center_x + x * scale
+        ys = center_y - y * scale
+        pygame.draw.line(screen, BLACK, (xs - 5, ys), (xs + 5, ys), 2)
+        pygame.draw.line(screen, BLACK, (xs, ys - 5), (xs, ys + 5), 2)
 
 
 def check_net1(current_ball, ball_landing_pos, z_slider_val):
@@ -620,6 +628,8 @@ def checkball_hit(current_ball, ball_landing_pos, turn):
                 if (
                     math.hypot(x - p2b_pos[0], y - p2b_pos[1])
                     < PLAYER_VMAX * t + PLAYER_REACH
+                    and GameType.DOUBLES
+                    and turn == 12
                 ):
                     ballcatchb.append((x, y, z, t))
         if turn in (2, 14):  # p2 打ってください
@@ -633,6 +643,8 @@ def checkball_hit(current_ball, ball_landing_pos, turn):
                 if (
                     math.hypot(x - p1b_pos[0], y - p1b_pos[1])
                     < PLAYER_VMAX * t + PLAYER_REACH
+                    and GameType.DOUBLES
+                    and turn == 14
                 ):
                     ballcatchb.append((x, y, z, t))
 
@@ -699,7 +711,7 @@ while True:
                     )
                     ball_flying = True
                 elif turn == 20:
-                    # ポイント終了でOKボタン                    
+                    # ポイント終了でOKボタン
                     initplay()
                 elif turn == 0:
                     # 位置についてくださいでOKボタン
@@ -721,6 +733,16 @@ while True:
             if turn == 0:
                 # 位置についてくださいでクリック
                 # サーバー、レシーバーは立つ位置を決める
+
+                b1b = field_bottom
+                t1b = -1.00
+                l1b = field_l
+                r1b = field_r
+                b2b = +1.00
+                t2b = field_top
+                l2b = field_l
+                r2b = field_r
+
                 if (p1_games + p2_games) % 2 == 0:
                     b2 = +1.00
                     t2 = field_top
@@ -750,21 +772,20 @@ while True:
                         r2 = court_r
 
                 print("t2,my,b2=", t2, my, b2, l2, mx, r2)
-                if t1 > my > b1 and l1 < mx < r1:
-                    if event.button == 3 and gt == GameType.DOUBLES:
+                if event.button == 3 and gt == GameType.DOUBLES:
+                    if t1b > my > b1b and l1b < mx < r1b:
                         p1b_pos = [mx, my]
                         p1b_pos_target = p1b_pos[:]
-                    else:
-                        p1_pos = [mx, my]
-                        p1_pos_target = p1_pos[:]
+                    if t2b > my > b2b and l2b < mx < r2b:
+                        p2b_pos = [mx, my]
+                        p2b_pos_target = p2b_pos[:]
+                elif t1 > my > b1 and l1 < mx < r1:
+                    p1_pos = [mx, my]
+                    p1_pos_target = p1_pos[:]
                     print("set p1_pos")
                 elif t2 > my > b2 and l2 < mx < r2:
-                    if event.button == 3 and gt == GameType.DOUBLES:
-                        p2b_pos = [mx, my]
-                        p2b_pos_target = p1b_pos[:]
-                    else:
-                        p2_pos = [mx, my]
-                        p2_pos_target = p2_pos[:]
+                    p2_pos = [mx, my]
+                    p2_pos_target = p2_pos[:]
                     print("set p2_pos")
 
             # プレーヤー2は受け取る場所を決める
@@ -844,9 +865,9 @@ while True:
                     checkball_hit(current_ball, ball_landing_pos, turn)
                 elif field_bottom < my < -1.00:
                     if event.button == 3 and gt == GameType.DOUBLES:
-                       p1b_pos_target = [mx, my]
+                        p1b_pos_target = [mx, my]
                     else:
-                       p1_pos_target = [mx, my]
+                        p1_pos_target = [mx, my]
 
             elif turn == 14:
                 # P2打ってくださいでクリック
@@ -867,7 +888,6 @@ while True:
                     else:
                         p2_pos_target = [mx, my]
 
-
             elif turn == 13 and 1.00 < my < field_top:
                 # プレーヤー2のターン　取りに行く
                 n = 0
@@ -875,21 +895,27 @@ while True:
                     for x, y, z, t in ballcatchb:
                         if math.hypot(mx - x, my - y) < 0.5:
                             n = n + 1
-                            p2b_pos_target = [x, y]
+                            p2_pos = p2b_pos[:]
+                            p2b_pos = p2_pos[:]
+                            p2b_pos_target = p2_pos_target[:]
+                            p2_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
+                            temp = ballcatch[:]
+                            ballcatch = ballcatchb[:]
+                            ballcatchb = temp[:]
                             break
                     if n == 0:
-                            p2b_pos_target = [mx,my]
-                else :
+                        p2b_pos_target = [mx, my]
+
+                else:
                     for x, y, z, t in ballcatch:
                         if math.hypot(mx - x, my - y) < 0.5:
                             n = n + 1
                             p2_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
                             break
-                    if n== 0:
-                            p2_pos_target = [mx,my]
-
+                    if n == 0:
+                        p2_pos_target = [mx, my]
 
                 if len(ballcatch) + len(ballcatchb) == 0:
                     turn = 20
@@ -910,20 +936,26 @@ while True:
                     for x, y, z, t in ballcatchb:
                         if math.hypot(mx - x, my - y) < 0.5:
                             n = n + 1
-                            p1b_pos_target = [x, y]
+                            p1_pos = p1b_pos[:]
+                            p1b_pos = p1_pos[:]
+                            p1b_pos_target = p1_pos_target[:]
+                            p1_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
+                            temp = ballcatch[:]
+                            ballcatch = ballcatchb[:]
+                            ballcatchb = temp[:]
                             break
                     if n == 0:
-                            p1b_pos_target = [mx,my]
-                else :
+                        p1b_pos_target = [mx, my]
+                else:
                     for x, y, z, t in ballcatch:
                         if math.hypot(mx - x, my - y) < 0.5:
                             n = n + 1
                             p1_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
                             break
-                    if n== 0:
-                            p1_pos_target = [mx,my]
+                    if n == 0:
+                        p1_pos_target = [mx, my]
 
                 if len(ballcatch) + len(ballcatchb) == 0:
                     turn = 20
@@ -945,8 +977,7 @@ while True:
     if ball_flying:
         t = t + 0.02
         ball_pos[0] += ball_vx * 0.02
-        ball_pos[1]           # 13:P2 取りに行ってくださいで
- += ball_vy * 0.02
+        ball_pos[1] += ball_vy * 0.02
         ball_pos[2] += ball_vz * 0.02
         ball_vz -= g * 0.02
 
@@ -964,7 +995,9 @@ while True:
                 ball_landing_pos = None
                 ball_landing_pos2 = None
                 p1_pos = p1_pos_target[:]
+                p1b_pos = p1b_pos_target[:]
                 p2_pos = p2_pos_target[:]
+                p2b_pos = p2b_pos_target[:]
                 ball_pos = ball_pos_target[0:3]
                 current_player = p2_pos[:]
                 difensive_player = p1_pos[:]
@@ -976,7 +1009,9 @@ while True:
                 ball_landing_pos = None
                 ball_landing_pos2 = None
                 p1_pos = p1_pos_target[:]
+                p1b_pos = p1b_pos_target[:]
                 p2_pos = p2_pos_target[:]
+                p2b_pos = p2b_pos_target[:]
                 ball_pos = ball_pos_target[0:3]  # 0 1 2
                 current_player = p1_pos[:]
                 difensive_player = p2_pos[:]
@@ -1064,41 +1099,6 @@ while True:
                 current_ball[1] + ball_vy * t_flight2,
             )
 
-            for i in range(3, 20):
-                z = i * 0.1
-
-                b = -ball_vz
-                c = z - current_ball[2]
-                discriminant = b**2 - 4 * a * c
-                if discriminant > 0 and shot >= 1:
-                    sqrt_d = math.sqrt(discriminant)
-                    t1 = (-b - sqrt_d) / (2 * a)  # 上昇時
-                    if t1 > t0:
-                        x1 = current_ball[0] + ball_vx * t1
-                        y1 = current_ball[1] + ball_vy * t1
-                        ballhit.append((x1, y1, z, t1))
-                    t2 = (-b + sqrt_d) / (2 * a)  # 下降時
-                    if t2 > t0:
-                        x2 = current_ball[0] + ball_vx * t2
-                        y2 = current_ball[1] + ball_vy * t2
-                        ballhit.append((x2, y2, z, t2))
-                b = -v_rebound
-                c = z  # 高さ0からの2バウンド目
-                discriminant = b**2 - 4 * a * c
-                if discriminant > 0:
-                    sqrt_d = math.sqrt(discriminant)
-                    t1 = (-b - sqrt_d) / (2 * a) + t_flight  # 上昇時
-                    x1 = current_ball[0] + ball_vx * t1
-                    y1 = current_ball[1] + ball_vy * t1
-                    if z > 0.49 or shot >= 1:
-                        ballhit.append((x1, y1, z, t1))
-                    t2 = (-b + sqrt_d) / (2 * a) + t_flight  # 下降時
-                    x2 = current_ball[0] + ball_vx * t2
-                    y2 = current_ball[1] + ball_vy * t2
-                    ballhit.append((x2, y2, z, t2))
-            # 4つ目の値（index 3）でソート
-            ballhit = sorted(ballhit, key=lambda x: x[3])
-
             draw_landing_marker(ball_landing_pos, RED)
             draw_landing_marker(ball_landing_pos2, RED)
             # ボールの軌跡を表示する
@@ -1119,9 +1119,9 @@ while True:
 
     if turn in (13, 5):
         # キャッチできるポイントを表示
-        draw_candidates(ballhit, difensive_player, p2_pos_target)
+        draw_candidates(ballhit, ballcatch, ballcatchb, p2_pos_target)
     if turn in (11, 3):
-        draw_candidates(ballhit, difensive_player, p1_pos_target)
+        draw_candidates(ballhit, ballcatch, ballcatchb, p1_pos_target)
 
     draw_ok_button()  # OKボタンを表示する。
 
