@@ -518,11 +518,11 @@ def draw_scoreboard():
         message = "P2 取りに行ってください"
 
     elif turn == 11:  # <==4
-        message = "P1 取りに行って"
+        message = "P1 取りに行ってください"
     elif turn == 12:  # <==1
         message = "P1 打ってください"
     elif turn == 13:  # <==2
-        message = "P2 取りに行って"
+        message = "P2 取りに行ってください"
     elif turn == 14:  # <==3
         message = "P2 打ってください"
     elif turn == 20:  # <==5
@@ -657,27 +657,52 @@ while True:
             if ok_button_rect.collidepoint(mxs, mys):
                 print("turn=", turn, "bal_landing_pos", ball_landing_pos2)
                 if turn in (4, 12) and ball_landing_pos2:
+                    # P1 打ってくださいでOKボタン
                     turn = 13
                     p2_pos_target = p2_pos[:]
                     # AIstart()
                 elif turn in (2, 14) and ball_landing_pos2:
+                    # P2 打ってください"でOKボタン
                     turn = 11
                     p1_pos_target = p1_pos[:]
                 elif turn == 13 and p2_pos_target:
+                    # P2 取りに行ってくださいでOKボタン
                     print(ball_pos_target)
                     print(ball_pos_target[3])
                     p1_pos_target = adjust_target(
                         p1_pos, p1_pos_target, ball_pos_target[3]
                     )
-                    ball_flying = True
-                elif turn == 11 and p1_pos_target:
+                    p1_pos_target = adjust_target(
+                        p1b_pos, p1b_pos_target, ball_pos_target[3]
+                    )
                     p2_pos_target = adjust_target(
                         p2_pos, p2_pos_target, ball_pos_target[3]
                     )
+                    p2b_pos_target = adjust_target(
+                        p2b_pos, p2b_pos_target, ball_pos_target[3]
+                    )
+
+                    ball_flying = True
+                elif turn == 11 and p1_pos_target:
+                    # P1取りに行ってくださいでOKボタン
+                    p1_pos_target = adjust_target(
+                        p1_pos, p1_pos_target, ball_pos_target[3]
+                    )
+                    p1b_pos_target = adjust_target(
+                        p1b_pos, p1b_pos_target, ball_pos_target[3]
+                    )
+                    p2_pos_target = adjust_target(
+                        p2_pos, p2_pos_target, ball_pos_target[3]
+                    )
+                    p2b_pos_target = adjust_target(
+                        p2b_pos, p2b_pos_target, ball_pos_target[3]
+                    )
                     ball_flying = True
                 elif turn == 20:
+                    # ポイント終了でOKボタン                    
                     initplay()
                 elif turn == 0:
+                    # 位置についてくださいでOKボタン
                     ball_landing_pos = None
                     ball_landing_pos2 = None
                     if (p1_games + p2_games) % 2 == 0:
@@ -694,6 +719,8 @@ while True:
                 print("turn=", turn)
 
             if turn == 0:
+                # 位置についてくださいでクリック
+                # サーバー、レシーバーは立つ位置を決める
                 if (p1_games + p2_games) % 2 == 0:
                     b2 = +1.00
                     t2 = field_top
@@ -740,9 +767,10 @@ while True:
                         p2_pos_target = p2_pos[:]
                     print("set p2_pos")
 
-            # プレーヤー1はサービスをする場所を決める
             # プレーヤー2は受け取る場所を決める
             if turn == 4:
+                # P1サーブを打ってくださいでクリック
+                # プレーヤー1はサービスをどこに打つかと速度と移動場所決める
                 if (p1_point + p2_point) % 2 == 0:
                     t1 = service_line
                     b1 = 1.00
@@ -763,11 +791,16 @@ while True:
                     プレーヤー1はy<0に移動する
                     """
                     ball_landing_pos = (mx, my)
+                    checkball_hit(current_ball, ball_landing_pos, turn)
                 elif field_bottom < my < -1.00:
-                    p1_pos_target = [mx, my]
+                    if event.button == 3 and gt == GameType.DOUBLES:
+                        p1b_pos_target = [mx, my]
+                    else:
+                        p1_pos_target = [mx, my]
 
             elif turn == 2:
-                # プレーヤー2はサービスを打つ場所と移動先を指定する。
+                # P2サーブを打ってくださいでクリック
+                # プレーヤー2はサービスをどこに打つかと速度と移動先を指定する。
                 if (p1_point + p2_point) % 2 == 0:
                     t2 = -1.00
                     b2 = -service_line
@@ -782,10 +815,16 @@ while True:
                     handle_slider_input((mxs, mys))
                 elif b2 < my < t2 and l2 < mx < r2:
                     ball_landing_pos = (mx, my)  # ボールの着地点
+                    checkball_hit(current_ball, ball_landing_pos, turn)
                 elif 1.00 < my < field_top:
-                    p2_pos_target = [mx, my]
+                    if event.button == 3 and gt == GameType.DOUBLES:
+                        p2b_pos_target = [mx, my]
+                    else:
+                        p2_pos_target = [mx, my]
 
             elif turn == 12:
+                # P1打ってくださいでクリック
+                # プレーヤー1はどこに打つかと速度と移動先を指定する。
                 print("shot", shot)
 
                 t1 = court_top - MARGIN_LINE
@@ -802,10 +841,16 @@ while True:
                     プレーヤー1はy<0に移動する
                     """
                     ball_landing_pos = (mx, my)
+                    checkball_hit(current_ball, ball_landing_pos, turn)
                 elif field_bottom < my < -1.00:
-                    p1_pos_target = [mx, my]
+                    if event.button == 3 and gt == GameType.DOUBLES:
+                       p1b_pos_target = [mx, my]
+                    else:
+                       p1_pos_target = [mx, my]
 
             elif turn == 14:
+                # P2打ってくださいでクリック
+                # プレーヤー2はどこに打つかと速度と移動先を指定する。
                 b2 = court_bottom + MARGIN_LINE
                 l2 = court_l + MARGIN_LINE
                 r2 = court_r - MARGIN_LINE
@@ -814,23 +859,39 @@ while True:
                     handle_slider_input((mxs, mys))
                 elif b2 < my < t2 and l2 < mx < r2:
                     ball_landing_pos = (mx, my)  # ボールの着地点
+                    checkball_hit(current_ball, ball_landing_pos, turn)
+
                 elif 1.00 < my < field_top:
-                    p2_pos_target = [mx, my]
+                    if event.button == 3 and gt == GameType.DOUBLES:
+                        p2b_pos_target = [mx, my]
+                    else:
+                        p2_pos_target = [mx, my]
+
 
             elif turn == 13 and 1.00 < my < field_top:
                 # プレーヤー2のターン　取りに行く
                 n = 0
-                for x, y, z, t in ballhit:
-                    if (
-                        math.hypot(x - p2_pos[0], y - p2_pos[1])
-                        < PLAYER_VMAX * t + PLAYER_REACH
-                    ):
-                        n = n + 1
+                if event.button == 3 and gt == GameType.DOUBLES:
+                    for x, y, z, t in ballcatchb:
                         if math.hypot(mx - x, my - y) < 0.5:
+                            n = n + 1
+                            p2b_pos_target = [x, y]
+                            ball_pos_target = [x, y, z, t]
+                            break
+                    if n == 0:
+                            p2b_pos_target = [mx,my]
+                else :
+                    for x, y, z, t in ballcatch:
+                        if math.hypot(mx - x, my - y) < 0.5:
+                            n = n + 1
                             p2_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
                             break
-                if n == 0:
+                    if n== 0:
+                            p2_pos_target = [mx,my]
+
+
+                if len(ballcatch) + len(ballcatchb) == 0:
                     turn = 20
                     message = "プレーヤー1 Point"
                     p1_point += 1
@@ -845,18 +906,26 @@ while True:
 
             elif turn == 11 and field_bottom < my < -1.00:
                 n = 0
-                for x, y, z, t in ballhit:
-                    if (
-                        math.hypot(x - p1_pos[0], y - p1_pos[1])
-                        < PLAYER_VMAX * t + PLAYER_REACH
-                    ):
-                        n = n + 1
+                if event.button == 3 and gt == GameType.DOUBLES:
+                    for x, y, z, t in ballcatchb:
                         if math.hypot(mx - x, my - y) < 0.5:
+                            n = n + 1
+                            p1b_pos_target = [x, y]
+                            ball_pos_target = [x, y, z, t]
+                            break
+                    if n == 0:
+                            p1b_pos_target = [mx,my]
+                else :
+                    for x, y, z, t in ballcatch:
+                        if math.hypot(mx - x, my - y) < 0.5:
+                            n = n + 1
                             p1_pos_target = [x, y]
                             ball_pos_target = [x, y, z, t]
                             break
+                    if n== 0:
+                            p1_pos_target = [mx,my]
 
-                if n == 0:
+                if len(ballcatch) + len(ballcatchb) == 0:
                     turn = 20
                     message = "プレーヤー2 Point"
                     p2_point += 1
@@ -876,15 +945,20 @@ while True:
     if ball_flying:
         t = t + 0.02
         ball_pos[0] += ball_vx * 0.02
-        ball_pos[1] += ball_vy * 0.02
+        ball_pos[1]           # 13:P2 取りに行ってくださいで
+ += ball_vy * 0.02
         ball_pos[2] += ball_vz * 0.02
         ball_vz -= g * 0.02
 
         if turn in (13, 11):
+            # 11:P1 取りに行ってくださいでO
+            # 13:P2 取りに行ってくださいで
+
             if t > ball_pos_target[3]:
                 t = 0
                 ball_flying = False
         if not ball_flying:
+            # 13:P2 取りに行った後
             if turn == 13:
                 turn = 14
                 ball_landing_pos = None
@@ -897,7 +971,7 @@ while True:
                 current_ball = ball_pos[:]
                 shot += 1
             elif turn == 11:
-                # player1が取る位置を決めた後。
+                # 11:P1が取りに行った後。
                 turn = 12
                 ball_landing_pos = None
                 ball_landing_pos2 = None
