@@ -1106,7 +1106,7 @@ while True:
         a = 0.5 * g
         z0 = current_ball[2] + ball_vz * t0 - a * t0 * t0
         x0 = current_ball[0] + ball_vx * t0
-        ballhit = []
+        # ballhit = []
         if check_net(x0, z0):
             v_land = ball_vz - g * t_flight  # 着地時の速度（負の値）
             v_rebound = -v_land * 0.8  # 跳ね返り初速（正の値）
