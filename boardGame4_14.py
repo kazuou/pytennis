@@ -31,12 +31,15 @@ class Character:
 
 # 状態クラス
 # AIでも使う
-# 現在値 turn,p1_point,p2_point,p1_game,p2_game
+# 現在値 turn 0(ready) 2(p2_hit),4(p1_hit),11(p1_catch&hit),13(p2_catch&hit) 20(point end)
+# 現在値 p1_point,p2_point,p1_game,p2_game
 # 現在値 p1_pos,p2_pos,p1b_pos,p2b_pos
 # 現在値 ball_pos
+# 現在値 turn,p1_point,p2_point,p1_game,p2_game
 # 目標 p1_target_pos,p2_target_pos,p1b_target_pos,p2b_target_pos
 # 目標 ball_landing_pos,ball_vz
 # 派生 ball_landing_pos2
+# 派生　ballhit ballcatch,ballcatchb
 
 
 class GameState:
@@ -104,6 +107,12 @@ class GameState:
             self.turn = 22  # game over
         else:
             self.turn = 0  # point start
+
+    def catch1(self, p1_target_pos, p1b_target_pos=None):
+        pass
+
+    def hit1(self, ball_landing_pos, p1_target_pos, p1b_target_pos=None):
+        pass
 
 
 class GameType(Enum):
