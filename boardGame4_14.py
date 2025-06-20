@@ -30,6 +30,15 @@ class Character:
 
 
 # 状態クラス
+# AIでも使う
+# 現在値 turn,p1_point,p2_point,p1_game,p2_game
+# 現在値 p1_pos,p2_pos,p1b_pos,p2b_pos
+# 現在値 ball_pos
+# 目標 p1_target_pos,p2_target_pos,p1b_target_pos,p2b_target_pos
+# 目標 ball_landing_pos,ball_vz
+# 派生 ball_landing_pos2
+
+
 class GameState:
     def __init__(
         self,
@@ -59,6 +68,42 @@ class GameState:
         self.p2B_pos_target = p2_pos[:]
         # ball_landing_pos2 = None
         self.turn = turn
+
+    def initpoint(self):
+
+        # global p1_pos, p2_pos, p1_pos_target, p2_pos_target
+        # global ball_pos, ball_pos_target
+        # global current_player, difensive_player, current_ball
+        # global ball_flying, ball_landing_pos, ball_landing_pos2
+        # global shot
+        # global p1_point, p2_point, p1_games, p2_games, turn
+        self.p1_pos = [0, -11.90]  # 手前
+        self.p2_pos = [0, 11.90]  # 奥
+        self.p1_pos_target = self.p1_pos[:]
+        self.p2_pos_target = self.p2_pos[:]
+        self.ball_pos = [self.p1_pos[0], self.p1_pos[1], 1.00]
+        self.ball_pos_target = [self.p1_pos[0], self.p1_pos[1], 1.00, 0]
+        self.current_player = self.p1_pos[:]
+        self.difensive_player = self.p2_pos[:]
+        self.current_ball = self.ball_pos[:]
+        self.ball_flying = False
+        self.ball_landing_pos = None
+        self.ball_landing_pos2 = None
+        self.shot = 0
+        if p1_point >= 4:
+            self.p1_point = 0
+            self.p2_point = 0
+            self.p1_games += 1
+
+        if p2_point >= 4:
+            self.p1_point = 0
+            self.p2_point = 0
+            self.p2_games += 1
+
+        if self.p1_games >= 4 or self.p2_games >= 4:
+            self.turn = 22  # game over
+        else:
+            self.turn = 0  # point start
 
 
 class GameType(Enum):
