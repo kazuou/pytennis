@@ -1030,7 +1030,7 @@ while True:
 
     # 描画処理
     # コート描画
-    draw_court()
+    draw_court(gt)
 
     # プレーヤー1描画
     pygame.draw.circle(
