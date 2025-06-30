@@ -86,8 +86,8 @@ class GameType(Enum):
         # シングルスの場合。ダブルスは6.399
 
 
-gt = GameType.SINGLES  # または GameType.DOUBLES
-# gt = GameType.DOUBLES  # または GameType.DOUBLES
+# gt = GameType.SINGLES  # または GameType.DOUBLES
+gt = GameType.DOUBLES  # または GameType.DOUBLES
 
 
 def rgb(r, g, b):
@@ -1106,7 +1106,7 @@ while True:
         a = 0.5 * g
         z0 = current_ball[2] + ball_vz * t0 - a * t0 * t0
         x0 = current_ball[0] + ball_vx * t0
-        ballhit = []
+        # ballhit = []
         if check_net(x0, z0):
             v_land = ball_vz - g * t_flight  # 着地時の速度（負の値）
             v_rebound = -v_land * 0.8  # 跳ね返り初速（正の値）
@@ -1137,10 +1137,10 @@ while True:
         draw_slider(slider_x, z_slider_y, z_slider_val, BALL_VZMIN, BALL_VZMAX, "Z速度")
         # draw_slider(slider_x, h_slider_y, h_slider_val, 0, ball_vmax, "水平速度")
 
-    if turn in (13, 5):
+    if turn in (13, 14, 5):
         # キャッチできるポイントを表示
         draw_candidates(ballhit, ballcatch, ballcatchb, p2_pos_target)
-    if turn in (11, 3):
+    if turn in (11, 12, 3):
         draw_candidates(ballhit, ballcatch, ballcatchb, p1_pos_target)
 
     draw_ok_button()  # OKボタンを表示する。

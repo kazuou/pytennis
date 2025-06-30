@@ -247,10 +247,12 @@ p1b_pos = p1_pos[:]  # 手前
 p2b_pos = p2_pos[:]  # 奥
 p1b_pos_target = p1_pos[:]
 p2b_pos_target = p2_pos[:]
-
-PLAYER_VMAX = 5
-PLAYER_REACH = 1
-
+if gt == GameType.DOUBLES:
+    PLAYER_VMAX = 4
+    PLAYER_REACH = 0.8
+else:
+    PLAYER_VMAX = 5
+    PLAYER_REACH = 1
 
 # field_width = int(2097 * scale)
 # field_height = int(3379 * scale)
@@ -1191,10 +1193,10 @@ while True:
         draw_slider(slider_x, z_slider_y, z_slider_val, BALL_VZMIN, BALL_VZMAX, "Z速度")
         # draw_slider(slider_x, h_slider_y, h_slider_val, 0, ball_vmax, "水平速度")
 
-    if turn in (13, 5):
+    if turn in (13, 14, 5):
         # キャッチできるポイントを表示
         draw_candidates(ballhit, ballcatch, ballcatchb, p2_pos_target)
-    if turn in (11, 3):
+    if turn in (11, 12, 3):
         draw_candidates(ballhit, ballcatch, ballcatchb, p1_pos_target)
 
     draw_ok_button()  # OKボタンを表示する。
