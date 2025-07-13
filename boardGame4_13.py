@@ -86,8 +86,8 @@ class GameType(Enum):
         # シングルスの場合。ダブルスは6.399
 
 
-# gt = GameType.SINGLES  # または GameType.DOUBLES
-gt = GameType.DOUBLES  # または GameType.DOUBLES
+gt = GameType.SINGLES  # または GameType.DOUBLES
+# gt = GameType.DOUBLES  # または GameType.DOUBLES
 
 
 def rgb(r, g, b):
