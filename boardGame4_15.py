@@ -41,6 +41,48 @@ class Character:
 # 派生 ball_landing_pos2
 # 派生　ballhit ballcatch,ballcatchb
 
+class CourtConfig:
+    # スケーリング倍率
+    scale = 20
+
+    # フィールド定義(描画座標)
+    field_width = int(20.97 * scale)
+    field_height = int(33.79 * scale)
+
+    # 原点定義(描画座標)
+    center_x = field_width // 2
+    center_y = field_height // 2 + 100
+
+    # コート定義(描画座標)
+    court_width = int(10.97 * scale)
+    court_height = int(23.79 * scale)
+    court_rect = pygame.Rect(
+        center_x - court_width // 2,
+        center_y - court_height // 2,
+        court_width,
+        court_height,
+    )
+    field_bottom = (center_y - field_height - 100) / scale
+    field_top = (center_y - 100) / scale
+    field_l = -16.89
+    field_r = 16.89
+
+
+    # コート定義(リアル座標メートル)
+    court_top = 11.895
+    court_bottom = -11.895
+    # court_l = -4.115
+    # court_r = 4.116
+    service_line = 6.40
+
+    scoreBoard_y = 0
+    scoreBoard_rect = pygame.Rect(0, 0, field_width, 100)
+
+    controler_y = field_height + 100
+    controler_rect = pygame.Rect(0, controler_y, field_width, field_height + 150)
+
+
+
 
 class GameState:
     def __init__(
