@@ -556,56 +556,6 @@ def format_point(p):
     return ["0", "15", "30", "40", "G"][min(p, 4)]
 
 
-def draw_scoreboard():
-    global message
-    global message2
-    font = pygame.font.SysFont("Arial", 24)
-
-    score_text = (
-        f"P1: {format_point(p1_point)} ({p1_games})  -  "
-        f"P2: {format_point(p2_point)} ({p2_games})"
-    )
-
-    score_surface = font.render(score_text, True, BLUE)
-    screen.blit(score_surface, (field_width // 2 - score_surface.get_width() // 2, 10))
-    msg_font = pygame.font.SysFont(fontname, 18)
-
-    if turn == 0:
-        message = "P1 P2 位置についてださい"
-    elif turn == 2:
-        message = "P2 サーブを打ってください"
-    elif turn == 3:
-        message = "P1 取りに行ってください"
-    elif turn == 4:
-        message = "P1 サーブを打ってください"
-    elif turn == 5:
-        message = "P2 取りに行ってください"
-
-    elif turn == 11:  # <==4
-        message = "P1 取りに行ってください"
-    elif turn == 12:  # <==1
-        message = "P1 打ってください"
-    elif turn == 13:  # <==2
-        message = "P2 取りに行ってください"
-    elif turn == 14:  # <==3
-        message = "P2 打ってください"
-    elif turn == 20:  # <==5
-        pass
-    elif turn == 21:  # <==5
-        if p1_games >= 4:
-            message = "P1 Win Game End"
-        else:
-            message = "P2 Win Game End"
-        pass
-    else:
-        message = ""
-
-    msg_surface = msg_font.render(message, True, BLACK)
-    screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 45))
-    msg_surface = msg_font.render(message2, True, BLACK)
-    screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 65))
-
-
 def checkball_hit(current_ball, ball_landing_pos, turn):
     # netは超えている
     global ballhit, ballcatch, ballcatchb

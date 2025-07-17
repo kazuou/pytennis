@@ -3,6 +3,9 @@ import sys
 import math
 import socket
 from enum import Enum
+from module15.draw import draw_court, draw_ok_button, draw_landing_marker
+from module15.draw import draw_trajectory, draw_slider, draw_candidates, draw_scoreboard
+import config15 as config
 
 
 class Character:
@@ -41,78 +44,44 @@ class Character:
 # 派生 ball_landing_pos2
 # 派生　ballhit ballcatch,ballcatchb
 
-class CourtConfig:
-    # スケーリング倍率
-    scale = 20
-
-    # フィールド定義(描画座標)
-    field_width = int(20.97 * scale)
-    field_height = int(33.79 * scale)
-
-    # 原点定義(描画座標)
-    center_x = field_width // 2
-    center_y = field_height // 2 + 100
-
-    # コート定義(描画座標)
-    court_width = int(10.97 * scale)
-    court_height = int(23.79 * scale)
-    court_rect = pygame.Rect(
-        center_x - court_width // 2,
-        center_y - court_height // 2,
-        court_width,
-        court_height,
-    )
-    field_bottom = (center_y - field_height - 100) / scale
-    field_top = (center_y - 100) / scale
-    field_l = -16.89
-    field_r = 16.89
-
-
-    # コート定義(リアル座標メートル)
-    court_top = 11.895
-    court_bottom = -11.895
-    # court_l = -4.115
-    # court_r = 4.116
-    service_line = 6.40
-
-    scoreBoard_y = 0
-    scoreBoard_rect = pygame.Rect(0, 0, field_width, 100)
-
-    controler_y = field_height + 100
-    controler_rect = pygame.Rect(0, controler_y, field_width, field_height + 150)
-
-
-
 
 class GameState:
     def __init__(
         self,
-        ball_pos,
-        player1_pos,
-        player2_pos,
-        turn,
-        player1B_pos=None,
-        player2B_pos=None,
+        gt,
     ):
-        self.ball_pos = ball_pos
-        self.ball_vz = 0  # ボールの速度ベクトル
-        self.ball_landing_pos = None
-        self.p1_pos = player1_pos
-        self.p2_pos = player2_pos
+        self.p1_pos = [0, -11.90]  # 手前
+        self.p2_pos = [0, 11.90]  # 奥
         self.p1_pos_target = p1_pos[:]
         self.p2_pos_target = p2_pos[:]
-        if player1B_pos is None:
-            self.p1B_pos = p1_pos[:]
-        else:
-            self.p1B_pos = player1B_pos
-        self.p1B_pos_target = p1_pos[:]
-        if player2B_pos is None:
-            self.p2B_pos = p2_pos[:]
-        else:
-            self.p2B_pos = player2B_pos
-        self.p2B_pos_target = p2_pos[:]
-        # ball_landing_pos2 = None
-        self.turn = turn
+        self.p1b_pos = p1_pos[:]  # 手前
+        self.p2b_pos = p2_pos[:]  # 奥
+
+        self.p1b_pos_target = p1_pos[:]
+        self.p2b_pos_target = p2_pos[:]
+
+        self.ballhit = []
+        self.ballcatch = []
+        self.ballcatchb = []
+        self.ball_landing_pos = None
+        self.ball_landing_pos2 = None
+        self.ball_pos = [p1_pos[0], p1_pos[1], 1.00]
+        self.ball_pos_target = [p1_pos[0], p1_pos[1], 1.00, 0]
+        self.ball_vx = 0
+        self.ball_vy = 0
+        self.ball_vz = 0
+
+        self.turn = 0
+        self.current_player = p1_pos[:]
+        self.difensive_player = p2_pos[:]
+        self.current_ball = ball_pos[:]
+        self.ball_flying = False
+
+        self.p1_point = 0
+        self.p2_point = 0
+        self.p1_games = 0
+        self.p2_games = 0
+        self.shot = 0
 
     def initpoint(self):
 
@@ -186,199 +155,36 @@ class GameType(Enum):
 gt = GameType.DOUBLES  # または GameType.DOUBLES
 
 
-def rgb(r, g, b):
-    return (r, g, b)
-
-
-# 自分のホスト名からIPアドレスを取得
-host_name = socket.gethostname()
-ip_address = socket.gethostbyname(host_name)
-print(host_name)
-# IPアドレスをドットで分割して、最後の部分を取得
-last_octet = ip_address.split(".")[-1]
-
-# if socket.gethostname() == "Cortina.local":
-# if host_name == "Cortina.local":
-keyword72 = "Cortina"
-keywords = {
-    "Candace": ("notosansmonocjkjp", 74),
-    "Amber": ("msgothic", 83),
-    "W10029376A": ("yumincho", 70),
-}
-
-if keyword72 in host_name:
-    print("in Cortina")
-    # filename = "FontPygame72"
-    fontname = "ヒラキノ角コシックw5"
-elif (keyword := keywords.get(host_name)) is not None:
-    fontname = keyword[0]
-    last_octet = keyword[1]
-else:
-    # filename = "FontPygame"
-    fontname = "notosansmonocjkjp"
-
-print(f"最後のIPアドレスの数字は: {last_octet}")
-print("font=", fontname)
 # 初期化
 pygame.init()
-info = pygame.display.Info()
-screen_width = info.current_w
-screen_height = info.current_h
-print("screen size=", screen_width, screen_height)
-
-# スケーリング倍率
-scale = 20
-field_width = int(20.97 * scale)
-field_height = int(33.79 * scale)
+# info = pygame.display.Info()
+# screen_width = info.current_w
+# screen_height = info.current_h
+# print("screen size=", screen_width, screen_height)
 
 # 画面設定
-screen = pygame.display.set_mode((field_width, field_height + 150))
+screen = pygame.display.set_mode((config.field_width, config.field_height + 150))
 pygame.display.set_caption("テニスボードゲーム")
 clock = pygame.time.Clock()
 
-# 色定義
-GREEN = rgb(0, 128, 0)
-BLUE = rgb(0, 102, 204)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-BLACK = (0, 0, 0)
-GRAY = rgb(200, 200, 200)
-GRAY2 = rgb(150, 150, 150)
-YELLOW = (255, 255, 0)
-
-# 原点定義
-center_x = field_width // 2
-center_y = field_height // 2 + 100
-
-
-# コート描画
-court_width = int(10.97 * scale)
-court_height = int(23.79 * scale)
-court_rect = pygame.Rect(
-    center_x - court_width // 2,
-    center_y - court_height // 2,
-    court_width,
-    court_height,
-)
-court_top = 11.895
-court_bottom = -11.895
-# court_l = -4.115
-# court_r = 4.116
-service_line = 6.40
-
-scoreBoard_y = 0
-scoreBoard_rect = pygame.Rect(0, 0, field_width, 100)
-controler_y = field_height + 100
-controler_rect = pygame.Rect(0, controler_y, field_width, field_height + 150)
-field_bottom = (center_y - field_height - 100) / scale
-field_top = (center_y - 100) / scale
-field_l = -16.89
-field_r = 16.89
-
-MARGIN_NET = 0.1
-MARGIN_LINE = 0.5
-
-
-# プレイヤー設定
-player_radius = 10
-p1_pos = [0, -11.90]  # 手前
-p2_pos = [0, 11.90]  # 奥
-p1_pos_target = p1_pos[:]
-p2_pos_target = p2_pos[:]
-p1b_pos = p1_pos[:]  # 手前
-p2b_pos = p2_pos[:]  # 奥
-p1b_pos_target = p1_pos[:]
-p2b_pos_target = p2_pos[:]
-if gt == GameType.DOUBLES:
-    PLAYER_VMAX = 4
-    PLAYER_REACH = 0.8
-else:
-    PLAYER_VMAX = 5
-    PLAYER_REACH = 1
-
-# field_width = int(2097 * scale)
-# field_height = int(3379 * scale)
-# controler_height = 100
-ballhit = []
-ballcatch = []
-ballcatchb = []
-
-# ボール設定
-BALL_RADIUS = 0.05
-ball_pos = [p1_pos[0], p1_pos[1], 1.00]
-ball_pos_target = [p1_pos[0], p1_pos[1], 1.00, 0]
-ball_vx = 0
-ball_vy = 0
-ball_vz = 0
-g = 9.8
-ball_vmax = 30  # 時速100kmは秒速28mです。
-BALL_VZMAX = 10  # 秒速9.9m/sで5m打ち上がる
-BALL_VZMIN = -3
 
 # 状態管理
-turn = 0
+gs = GameState(gt)
+
 ball_flying = False
-ball_landing_pos = None
-ball_landing_pos2 = None
-current_player = p1_pos[:]
-difensive_player = p2_pos[:]
-current_ball = ball_pos[:]
-
-p1_point = 0
-p2_point = 0
-p1_games = 0
-p2_games = 0
-shot = 0
-
-
-def draw_court():
-    lines = (
-        ((-5.485, 11.895), (5.485, 11.895), 0.10),  # ベースライン
-        ((-4.115, 6.40), (4.115, 6.40), 0.05),  # サービスライン
-        ((0, 11.895), (0, 11.785), 0.05),  # センターマーク
-        ((-5.485, 11.895), (-5.485, -11.895), 0.05),  # サイドライン左
-        ((-4.115, 11.895), (-4.115, -11.895), 0.05),  # シングルスライン左
-        ((0, 6.40), (0, -6.40), 0.05),  # センターライン
-        ((4.115, 11.895), (4.115, -11.895), 0.05),  # シングルスライン右
-        ((5.485, 11.895), (5.485, -11.895), 0.05),  # サイドライン右
-        ((0, -11.895), (0, -11.785), 0.05),  # センターマーク
-        ((-4.115, -6.40), (4.115, -6.40), 0.05),  # シングルスライン右
-        ((-gt.pole, 0), (gt.pole, 0), 0.10),  # ネットS
-        # ((-6.399, 0), (6.399, 0), 0.10),  # ネットD
-        ((-5.485, -11.895), (5.485, -11.895), 0.10),  # ベースライン下
-    )
-
-    screen.fill(GREEN)
-    pygame.draw.rect(screen, BLUE, court_rect)
-    pygame.draw.rect(screen, GRAY2, scoreBoard_rect)
-    pygame.draw.rect(screen, GRAY2, controler_rect)
-
-    # pygame.draw.line(screen, WHITE, (0, center_y), (field_width, center_y), 2)
-    for start, end, width in lines:
-        start_screen = (
-            start[0] * scale + field_width // 2,
-            start[1] * scale + center_y,
-        )
-        end_screen = (
-            end[0] * scale + field_width // 2,
-            end[1] * scale + center_y,
-        )
-        width_screen = round(width * scale)
-        pygame.draw.line(screen, WHITE, start_screen, end_screen, width_screen)
-
 
 # スライダー設定
 slider_length = 150
 slider_height = 10
 slider_x = 50
-z_slider_y = controler_y + 20
+z_slider_y = config.controler_y + 20
 # h_slider_y = controler_y + 60
 
-z_slider_val = (BALL_VZMAX - BALL_VZMIN) // 2
+z_slider_val = (config.BALL_VZMAX - config.BALL_VZMIN) // 2
 # h_slider_val = ball_vmax // 2
 
 ok_button_x = slider_x + slider_length + 150
-ok_button_y = controler_y + 10
+ok_button_y = config.controler_y + 10
 
 # draw_slider(slider_x, z_slider_y, z_slider_val, 20, "Z速度")
 # draw_slider(slider_x, h_slider_y, h_slider_val, 40, "水平速度")
@@ -392,80 +198,14 @@ def AIstart():
     ai_thinking = False
 
 
-def initplay():
-    global p1_pos, p2_pos, p1_pos_target, p2_pos_target
-    global ball_pos, ball_pos_target
-    global current_player, difensive_player, current_ball
-    global ball_flying, ball_landing_pos, ball_landing_pos2
-    global shot
-    global p1_point, p2_point, p1_games, p2_games, turn
-    p1_pos = [0, -11.90]  # 手前
-    p2_pos = [0, 11.90]  # 奥
-    p1_pos_target = p1_pos[:]
-    p2_pos_target = p2_pos[:]
-    ball_pos = [p1_pos[0], p1_pos[1], 1.00]
-    ball_pos_target = [p1_pos[0], p1_pos[1], 1.00, 0]
-    current_player = p1_pos[:]
-    difensive_player = p2_pos[:]
-    current_ball = ball_pos[:]
-    ball_flying = False
-    ball_landing_pos = None
-    ball_landing_pos2 = None
-    shot = 0
-    if p1_point >= 4:
-        p1_point = 0
-        p2_point = 0
-        p1_games += 1
-
-    if p2_point >= 4:
-        p1_point = 0
-        p2_point = 0
-        p2_games += 1
-
-    if p1_games >= 4 or p2_games >= 4:
-        turn = 22
-    else:
-        turn = 0
-
-
-def draw_slider(x, y, value, min_val, max_val, label):
-    """スライダー描画"""
-    pygame.draw.rect(screen, GRAY, (x, y, slider_length, slider_height))
-
-    # 正規化されたratio (0.0〜1.0)
-    ratio = (value - min_val) / (max_val - min_val)
-    ratio = max(0.0, min(1.0, ratio))  # 安全のためクリップ
-
-    # ノブのX位置を計算
-    knob_x = int(x + ratio * slider_length)
-
-    # ノブを描画
-    pygame.draw.rect(screen, RED, (knob_x - 5, y - 5, 10, slider_height + 10))
-    # font = pygame.font.SysFont(None, 24)
-    font = pygame.font.SysFont(fontname, 16)
-
-    text = font.render(f"{label}: {value:.1f}", True, BLACK)
-    screen.blit(text, (x + slider_length + 10, y - 5))
-
-
 # OKボタン設定
 ok_button_rect = pygame.Rect(ok_button_x, ok_button_y, 60, 30)
 
 
-def draw_ok_button():
-    # OKボタン設定
-    pygame.draw.rect(screen, BLUE, ok_button_rect)
-    font = pygame.font.SysFont(fontname, 18)
-    text = font.render("OK", True, WHITE)
-    text_rect = text.get_rect(center=ok_button_rect.center)
-    screen.blit(text, text_rect)
-
-
-def handle_slider_input(mouse_pos):
+def handle_slider_input(mouse_pos, z_slider_val):
     """スライダー"""
-    global z_slider_val
+    # global z_slider_val
     # global h_slider_val
-    global message2
     mx, my = mouse_pos
     if not ball_landing_pos:
         return
@@ -484,43 +224,7 @@ def handle_slider_input(mouse_pos):
             z_slider_val += 0.1
             # j = check_net1(current_ball, ball_landing_pos, z_slider_val)
             # print("check_net1=", j)
-
-
-def draw_landing_marker(pos, COLOR, cross=False):
-    # 場所にcross=True 「+」
-    if pos:
-        xs, ys = int(center_x + pos[0] * scale), int(center_y - pos[1] * scale)
-        if cross:
-            pygame.draw.line(screen, COLOR, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-            pygame.draw.line(screen, COLOR, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
-        else:
-            pygame.draw.line(screen, COLOR, (xs - 5, ys), (xs + 5, ys), 2)
-            pygame.draw.line(screen, COLOR, (xs, ys - 5), (xs, ys + 5), 2)
-
-
-def draw_candidates(candidate_list, ballcatch, ballcatchb, pos_target):
-    """ボールを受け取る場所をxで表示"""
-
-    for x, y, z, t in candidate_list:
-        xs = center_x + x * scale
-        ys = center_y - y * scale
-        pygame.draw.line(screen, GRAY2, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-        pygame.draw.line(screen, GRAY2, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
-
-    for x, y, z, t in ballcatch:
-        xs = center_x + x * scale
-        ys = center_y - y * scale
-        pygame.draw.line(screen, BLACK, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-        pygame.draw.line(screen, BLACK, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
-        if math.hypot(x - pos_target[0], y - pos_target[1]) < 0.1:
-            pygame.draw.line(screen, RED, (xs - 5, ys - 5), (xs + 5, ys + 5), 2)
-            pygame.draw.line(screen, RED, (xs - 5, ys + 5), (xs + 5, ys - 5), 2)
-
-    for x, y, z, t in ballcatchb:
-        xs = center_x + x * scale
-        ys = center_y - y * scale
-        pygame.draw.line(screen, BLACK, (xs - 5, ys), (xs + 5, ys), 2)
-        pygame.draw.line(screen, BLACK, (xs, ys - 5), (xs, ys + 5), 2)
+    return z_slider_val
 
 
 def check_net1(current_ball, ball_landing_pos, z_slider_val):
@@ -568,84 +272,6 @@ def adjust_target(p_pos, p_pos_target, time_limit):
         new_x = x1 + (x2 - x1) * ratio
         new_y = y1 + (y2 - y1) * ratio
         return [new_x, new_y]
-
-
-def draw_trajectory(start_pos, vx, vy, vz, tbound, tend):
-    """ボールの軌道を表示"""
-    path = []
-    t = 0.0
-    dt = 0.05
-
-    while True:
-        if t > tend:
-            # z = z0 + vz * t - 0.5 * g * t**2
-            # if z < 0:
-            break
-        if t < tbound:
-            z = start_pos[2] + vz * t - 0.5 * g * t**2
-        else:
-            z = -(vz - g * tbound) * 0.8 * (t - tbound) - 0.5 * g * (t - tbound) ** 2
-        x = center_x + (start_pos[0] + vx * t + z * 1.0) * scale
-        y = center_y - (start_pos[1] + vy * t + z * 1.0) * scale
-        path.append((int(x), int(y)))
-        t += dt
-    if len(path) >= 2:
-        pygame.draw.lines(screen, YELLOW, False, path, 2)
-        # print("len(path)=", len(path), path)
-
-
-def format_point(p):
-    return ["0", "15", "30", "40", "G"][min(p, 4)]
-
-
-def draw_scoreboard():
-    global message
-    global message2
-    font = pygame.font.SysFont("Arial", 24)
-
-    score_text = (
-        f"P1: {format_point(p1_point)} ({p1_games})  -  "
-        f"P2: {format_point(p2_point)} ({p2_games})"
-    )
-
-    score_surface = font.render(score_text, True, BLUE)
-    screen.blit(score_surface, (field_width // 2 - score_surface.get_width() // 2, 10))
-    msg_font = pygame.font.SysFont(fontname, 18)
-
-    if turn == 0:
-        message = "P1 P2 位置についてださい"
-    elif turn == 2:
-        message = "P2 サーブを打ってください"
-    elif turn == 3:
-        message = "P1 取りに行ってください"
-    elif turn == 4:
-        message = "P1 サーブを打ってください"
-    elif turn == 5:
-        message = "P2 取りに行ってください"
-
-    elif turn == 11:  # <==4
-        message = "P1 取りに行ってください"
-    elif turn == 12:  # <==1
-        message = "P1 打ってください"
-    elif turn == 13:  # <==2
-        message = "P2 取りに行ってください"
-    elif turn == 14:  # <==3
-        message = "P2 打ってください"
-    elif turn == 20:  # <==5
-        pass
-    elif turn == 21:  # <==5
-        if p1_games >= 4:
-            message = "P1 Win Game End"
-        else:
-            message = "P2 Win Game End"
-        pass
-    else:
-        message = ""
-
-    msg_surface = msg_font.render(message, True, BLACK)
-    screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 45))
-    msg_surface = msg_font.render(message2, True, BLACK)
-    screen.blit(msg_surface, (field_width // 2 - msg_surface.get_width() // 2, 65))
 
 
 def checkball_hit(current_ball, ball_landing_pos, turn):
@@ -906,7 +532,7 @@ while True:
                     r1 = 4.115
 
                 if my < field_bottom:
-                    handle_slider_input((mxs, mys))
+                    z_slider_val = handle_slider_input((mxs, mys), z_slider_val)
                     checkball_hit(current_ball, ball_landing_pos, turn)
 
                 elif b1 < my < t1 and l1 < mx < r1:
@@ -937,7 +563,7 @@ while True:
                     l2 = -4.115
                     r2 = 0
                 if my < field_bottom:
-                    handle_slider_input((mxs, mys))
+                    z_slider_val = handle_slider_input((mxs, mys), z_slider_val)
                     checkball_hit(current_ball, ball_landing_pos, turn)
 
                 elif b2 < my < t2 and l2 < mx < r2:
@@ -960,7 +586,7 @@ while True:
                 b1 = 1.00 + MARGIN_LINE
 
                 if my < field_bottom:
-                    handle_slider_input((mxs, mys))
+                    z_slider_val = handle_slider_input((mxs, mys), z_slider_val)
                     checkball_hit(current_ball, ball_landing_pos, turn)
 
                 elif b1 < my < t1 and l1 < mx < r1:
@@ -985,7 +611,7 @@ while True:
                 r2 = gt.court_r - MARGIN_LINE
                 t2 = -1.00 - MARGIN_LINE
                 if my < field_bottom:
-                    handle_slider_input((mxs, mys))
+                    z_slider_val = handle_slider_input((mxs, mys), z_slider_val)
                     checkball_hit(current_ball, ball_landing_pos, turn)
 
                 elif b2 < my < t2 and l2 < mx < r2:
@@ -1028,16 +654,16 @@ while True:
 
                 if len(ballcatch) + len(ballcatchb) == 0:
                     turn = 20
-                    message = "プレーヤー1 Point"
+                    message20 = "プレーヤー1 Point"
                     p1_point += 1
                     if p1_point >= 4:
                         p1_point = 0
                         p2_point = 0
                         p1_games += 1
-                        message = "プレーヤー1 Get Game"
+                        message20 = "プレーヤー1 Get Game"
                     if p1_games >= 4:
                         turn = 21
-                        message = "プレーヤー1 Win Game End"
+                        message20 = "プレーヤー1 Win Game End"
 
             elif turn == 11 and field_bottom < my < -1.00:
                 n = 0
@@ -1067,17 +693,17 @@ while True:
 
                 if len(ballcatch) + len(ballcatchb) == 0:
                     turn = 20
-                    message = "プレーヤー2 Point"
+                    message20 = "プレーヤー2 Point"
                     p2_point += 1
 
                     if p2_point >= 4:
                         p1_point = 0
                         p2_point = 0
                         p2_games += 1
-                        message = "プレーヤー2 Game"
+                        message20 = "プレーヤー2 Game"
                     if p2_games >= 4:
                         turn = 21
-                        message = "プレーヤー2 Win Game End"
+                        message20 = "プレーヤー2 Win Game End"
 
             # message2 = "turnx=" + f"{turn:.2f}" + "p1_pos=" + f"{p1_pos:.2f}"
             message2 = (
@@ -1139,7 +765,7 @@ while True:
 
     # 描画処理
     # コート描画
-    draw_court()
+    draw_court(screen, gt, court_rect, scoreBoard_rect, controler_rect)
 
     # プレーヤー1描画
     pygame.draw.circle(
@@ -1148,7 +774,7 @@ while True:
         (int(center_x + p1_pos[0] * scale), int(center_y - p1_pos[1] * scale)),
         player_radius,
     )
-    draw_landing_marker(p1_pos_target, RED, cross=True)
+    draw_landing_marker(screen, p1_pos_target, RED, cross=True)
 
     if gt == GameType.DOUBLES:
         pygame.draw.circle(
@@ -1158,7 +784,7 @@ while True:
             player_radius,
             width=2,
         )
-        draw_landing_marker(p1b_pos_target, RED, cross=False)
+        draw_landing_marker(screen, p1b_pos_target, RED, cross=False)
 
     # プレーヤー2描画
     pygame.draw.circle(
@@ -1167,7 +793,7 @@ while True:
         (int(center_x + p2_pos[0] * scale), int(center_y - p2_pos[1] * scale)),
         player_radius,
     )
-    draw_landing_marker(p2_pos_target, BLACK, cross=True)
+    draw_landing_marker(screen, p2_pos_target, BLACK, cross=True)
     if gt == GameType.DOUBLES:
         pygame.draw.circle(
             screen,
@@ -1176,7 +802,7 @@ while True:
             player_radius,
             width=2,
         )
-        draw_landing_marker(p2b_pos_target, BLACK, cross=False)
+        draw_landing_marker(screen, p2b_pos_target, BLACK, cross=False)
 
     if ball_flying:
         # 飛んでいる時にボールを描画
@@ -1217,11 +843,11 @@ while True:
                 current_ball[1] + ball_vy * t_flight2,
             )
 
-            draw_landing_marker(ball_landing_pos, RED)
-            draw_landing_marker(ball_landing_pos2, RED)
+            draw_landing_marker(screen, ball_landing_pos, RED)
+            draw_landing_marker(screen, ball_landing_pos2, RED)
             # ボールの軌跡を表示する
             draw_trajectory(
-                current_ball, ball_vx, ball_vy, ball_vz, t_flight, t_flight2
+                screen, current_ball, ball_vx, ball_vy, ball_vz, t_flight, t_flight2
             )
         else:
             # ボールのlanding_makerはネットの位置
@@ -1232,18 +858,20 @@ while True:
 
     if turn in (2, 4, 12, 14) and ball_landing_pos:
         # スライダーを表示する。
-        draw_slider(slider_x, z_slider_y, z_slider_val, BALL_VZMIN, BALL_VZMAX, "Z速度")
+        draw_slider(
+            screen, slider_x, z_slider_y, z_slider_val, BALL_VZMIN, BALL_VZMAX, "Z速度"
+        )
         # draw_slider(slider_x, h_slider_y, h_slider_val, 0, ball_vmax, "水平速度")
 
     if turn in (13, 14, 5):
         # キャッチできるポイントを表示
-        draw_candidates(ballhit, ballcatch, ballcatchb, p2_pos_target)
+        draw_candidates(screen, ballhit, ballcatch, ballcatchb, p2_pos_target)
     if turn in (11, 12, 3):
-        draw_candidates(ballhit, ballcatch, ballcatchb, p1_pos_target)
+        draw_candidates(screen, ballhit, ballcatch, ballcatchb, p1_pos_target)
 
-    draw_ok_button()  # OKボタンを表示する。
+    draw_ok_button(screen, ok_button_rect, fontname)  # OKボタンを表示する。
 
-    draw_scoreboard()  # スコアーボードを表示する。
+    draw_scoreboard(screen, message20, message2, gs)  # スコアーボードを表示する。
 
     pygame.display.flip()
     clock.tick(60)
