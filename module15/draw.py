@@ -2,27 +2,6 @@ import pygame
 import config15 as config
 import math
 
-MARGIN_NET = 0.1
-MARGIN_LINE = 0.5
-
-
-# プレイヤー設定
-player_radius = 10
-
-# if gt == GameType.DOUBLES:
-# PLAYER_VMAX = 4
-# PLAYER_REACH = 0.8
-# else:
-PLAYER_VMAX = 5
-PLAYER_REACH = 1
-
-# ボール設定
-BALL_RADIUS = 0.05
-
-ball_vmax = 30  # 時速100kmは秒速28mです。
-BALL_VZMAX = 10  # 秒速9.9m/sで5m打ち上がる
-BALL_VZMIN = -3
-
 
 def draw_court(screen, gt, court_rect, scoreBoard_rect, controler_rect):
     lines = (
@@ -161,13 +140,13 @@ def format_point(p):
     return ["0", "15", "30", "40", "G"][min(p, 4)]
 
 
-def draw_scoreboard(screen, message20, message2, gamestate):
+def draw_scoreboard(screen, message20, message2, gs):
     message = ""
     font = pygame.font.SysFont("Arial", 24)
 
     score_text = (
-        f"P1: {format_point(gamestate.p1_point)} ({gamestate.p1_games})  -  "
-        f"P2: {format_point(gamestate.p2_point)} ({gamestate.p2_games})"
+        f"P1: {format_point(gs.p1_point)} ({gs.p1_games})  -  "
+        f"P2: {format_point(gs.p2_point)} ({gs.p2_games})"
     )
 
     score_surface = font.render(score_text, True, config.BLUE)
@@ -176,29 +155,29 @@ def draw_scoreboard(screen, message20, message2, gamestate):
     )
     msg_font = pygame.font.SysFont(config.fontname, 18)
 
-    if turn == 0:
+    if gs.turn == 0:
         message = "P1 P2 位置についてださい"
-    elif turn == 2:
+    elif gs.turn == 2:
         message = "P2 サーブを打ってください"
-    elif turn == 3:
+    elif gs.turn == 3:
         message = "P1 取りに行ってください"
-    elif turn == 4:
+    elif gs.turn == 4:
         message = "P1 サーブを打ってください"
-    elif turn == 5:
+    elif gs.turn == 5:
         message = "P2 取りに行ってください"
 
-    elif turn == 11:  # <==4
+    elif gs.turn == 11:  # <==4
         message = "P1 取りに行ってください"
-    elif turn == 12:  # <==1
+    elif gs.turn == 12:  # <==1
         message = "P1 打ってください"
-    elif turn == 13:  # <==2
+    elif gs.turn == 13:  # <==2
         message = "P2 取りに行ってください"
-    elif turn == 14:  # <==3
+    elif gs.turn == 14:  # <==3
         message = "P2 打ってください"
-    elif turn == 20:  # <==5
+    elif gs.turn == 20:  # <==5
         message = message20
-    elif turn == 21:  # <==5
-        if gamestate.p1_games >= 4:
+    elif gs.turn == 21:  # <==5
+        if gs.p1_games >= 4:
             message = "P1 Win Game End"
         else:
             message = "P2 Win Game End"

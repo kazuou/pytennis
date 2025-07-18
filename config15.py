@@ -1,4 +1,5 @@
 import socket
+import pygame
 
 
 def rgb(r, g, b):
@@ -51,6 +52,28 @@ field_r = 16.89
 # スライダー設定
 slider_length = 150
 slider_height = 10
+
+
+MARGIN_NET = 0.1
+MARGIN_LINE = 0.5
+
+
+# プレイヤー設定
+player_radius = 10
+
+# if gt == GameType.DOUBLES:
+# PLAYER_VMAX = 4
+# PLAYER_REACH = 0.8
+# else:
+PLAYER_VMAX = 5
+PLAYER_REACH = 1
+
+# ボール設定
+BALL_RADIUS = 0.05
+
+ball_vmax = 30  # 時速100kmは秒速28mです。
+BALL_VZMAX = 10  # 秒速9.9m/sで5m打ち上がる
+BALL_VZMIN = -3
 
 
 # 自分のホスト名からIPアドレスを取得

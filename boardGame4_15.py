@@ -52,29 +52,29 @@ class GameState:
     ):
         self.p1_pos = [0, -11.90]  # 手前
         self.p2_pos = [0, 11.90]  # 奥
-        self.p1_pos_target = p1_pos[:]
-        self.p2_pos_target = p2_pos[:]
-        self.p1b_pos = p1_pos[:]  # 手前
-        self.p2b_pos = p2_pos[:]  # 奥
+        self.p1_pos_target = self.p1_pos[:]
+        self.p2_pos_target = self.p2_pos[:]
+        self.p1b_pos = self.p1_pos[:]  # 手前
+        self.p2b_pos = self.p2_pos[:]  # 奥
 
-        self.p1b_pos_target = p1_pos[:]
-        self.p2b_pos_target = p2_pos[:]
+        self.p1b_pos_target = self.p1_pos[:]
+        self.p2b_pos_target = self.p2_pos[:]
 
         self.ballhit = []
         self.ballcatch = []
         self.ballcatchb = []
         self.ball_landing_pos = None
         self.ball_landing_pos2 = None
-        self.ball_pos = [p1_pos[0], p1_pos[1], 1.00]
-        self.ball_pos_target = [p1_pos[0], p1_pos[1], 1.00, 0]
+        self.ball_pos = [self.p1_pos[0], self.p1_pos[1], 1.00]
+        self.ball_pos_target = [self.p1_pos[0], self.p1_pos[1], 1.00, 0]
         self.ball_vx = 0
         self.ball_vy = 0
         self.ball_vz = 0
 
         self.turn = 0
-        self.current_player = p1_pos[:]
-        self.difensive_player = p2_pos[:]
-        self.current_ball = ball_pos[:]
+        self.current_player = self.p1_pos[:]
+        self.difensive_player = self.p2_pos[:]
+        self.current_ball = self.ball_pos[:]
         self.ball_flying = False
 
         self.p1_point = 0
@@ -189,6 +189,7 @@ ok_button_y = config.controler_y + 10
 # draw_slider(slider_x, z_slider_y, z_slider_val, 20, "Z速度")
 # draw_slider(slider_x, h_slider_y, h_slider_val, 40, "水平速度")
 message2 = "プレイ"
+message20 = ""
 
 
 def AIstart():
@@ -200,6 +201,13 @@ def AIstart():
 
 # OKボタン設定
 ok_button_rect = pygame.Rect(ok_button_x, ok_button_y, 60, 30)
+
+
+def r2screen(r):
+    (x, y) = r
+    sx = int(config.center_x + x * config.scale)
+    sy = int(config.center_y - y * config.scale)
+    return (sx, sy)
 
 
 def handle_slider_input(mouse_pos, z_slider_val):
@@ -765,60 +773,67 @@ while True:
 
     # 描画処理
     # コート描画
-    draw_court(screen, gt, court_rect, scoreBoard_rect, controler_rect)
+    draw_court(
+        screen, gt, config.court_rect, config.scoreBoard_rect, config.controler_rect
+    )
 
     # プレーヤー1描画
     pygame.draw.circle(
         screen,
-        RED,
-        (int(center_x + p1_pos[0] * scale), int(center_y - p1_pos[1] * scale)),
-        player_radius,
+        config.RED,
+        r2screen((gs.p1_pos[0], gs.p1_pos[1])),
+        # (int(center_x + p1_pos[0] * scale), int(center_y - p1_pos[1] * scale)),
+        config.player_radius,
     )
-    draw_landing_marker(screen, p1_pos_target, RED, cross=True)
+    draw_landing_marker(screen, gs.p1_pos_target, config.RED, cross=True)
 
     if gt == GameType.DOUBLES:
         pygame.draw.circle(
             screen,
-            RED,
-            (int(center_x + p1b_pos[0] * scale), int(center_y - p1b_pos[1] * scale)),
-            player_radius,
+            config.RED,
+            r2screen((gs.p1b_pos[0], gs.p1b_pos[1])),
+            # (int(center_x + p1b_pos[0] * scale), int(center_y - p1b_pos[1] * scale)),
+            config.player_radius,
             width=2,
         )
-        draw_landing_marker(screen, p1b_pos_target, RED, cross=False)
+        draw_landing_marker(screen, gs.p1b_pos_target, config.RED, cross=False)
 
     # プレーヤー2描画
     pygame.draw.circle(
         screen,
-        BLACK,
-        (int(center_x + p2_pos[0] * scale), int(center_y - p2_pos[1] * scale)),
-        player_radius,
+        config.BLACK,
+        r2screen((gs.p2_pos[0], gs.p2_pos[1])),
+        # (int(center_x + p2_pos[0] * scale), int(center_y - p2_pos[1] * scale)),
+        config.player_radius,
     )
-    draw_landing_marker(screen, p2_pos_target, BLACK, cross=True)
+    draw_landing_marker(screen, gs.p2_pos_target, config.BLACK, cross=True)
     if gt == GameType.DOUBLES:
         pygame.draw.circle(
             screen,
-            BLACK,
-            (int(center_x + p2b_pos[0] * scale), int(center_y - p2b_pos[1] * scale)),
-            player_radius,
+            config.BLACK,
+            r2screen((gs.p2b_pos[0], gs.p2b_pos[1])),
+            # (int(center_x + p2b_pos[0] * scale), int(center_y - p2b_pos[1] * scale)),
+            config.player_radius,
             width=2,
         )
-        draw_landing_marker(screen, p2b_pos_target, BLACK, cross=False)
+        draw_landing_marker(screen, gs.p2b_pos_target, config.BLACK, cross=False)
 
     if ball_flying:
         # 飛んでいる時にボールを描画
         pygame.draw.circle(
             screen,
-            YELLOW,
-            (int(center_x + ball_pos[0] * scale), int(center_y - ball_pos[1] * scale)),
-            BALL_RADIUS * 4 * scale,  # *4は少し大きく描く
+            config.YELLOW,
+            r2screen((gs.ball_pos[0], gs.ball_pos[1])),
+            # (int(center_x + ball_pos[0] * scale), int(center_y - ball_pos[1] * scale)),
+            config.BALL_RADIUS * 4 * config.scale,  # *4は少し大きく描く
         )
 
-    if ball_landing_pos:
-        dx = ball_landing_pos[0] - current_ball[0]
-        dy = ball_landing_pos[1] - current_ball[1]
+    if gs.ball_landing_pos:
+        dx = gs.ball_landing_pos[0] - gs.current_ball[0]
+        dy = gs.ball_landing_pos[1] - gs.current_ball[1]
 
         t_flight = (
-            z_slider_val + math.sqrt(z_slider_val**2 + 2 * g * current_ball[2])
+            z_slider_val + math.sqrt(z_slider_val**2 + 2 * g * gs.current_ball[2])
         ) / g
 
         ball_vx = dx / t_flight
@@ -843,8 +858,8 @@ while True:
                 current_ball[1] + ball_vy * t_flight2,
             )
 
-            draw_landing_marker(screen, ball_landing_pos, RED)
-            draw_landing_marker(screen, ball_landing_pos2, RED)
+            draw_landing_marker(screen, ball_landing_pos, config.RED)
+            draw_landing_marker(screen, ball_landing_pos2, config.RED)
             # ボールの軌跡を表示する
             draw_trajectory(
                 screen, current_ball, ball_vx, ball_vy, ball_vz, t_flight, t_flight2
@@ -852,24 +867,30 @@ while True:
         else:
             # ボールのlanding_makerはネットの位置
             ball_landing_pos2 = None
-            draw_landing_marker((x0, 0), RED)
+            draw_landing_marker((x0, 0), config.RED)
             # ボールの軌跡を表示する。ネットまで
             draw_trajectory(current_ball, ball_vx, ball_vy, ball_vz, t0, t0)
 
-    if turn in (2, 4, 12, 14) and ball_landing_pos:
+    if gs.turn in (2, 4, 12, 14) and ball_landing_pos:
         # スライダーを表示する。
         draw_slider(
-            screen, slider_x, z_slider_y, z_slider_val, BALL_VZMIN, BALL_VZMAX, "Z速度"
+            screen,
+            slider_x,
+            z_slider_y,
+            z_slider_val,
+            config.BALL_VZMIN,
+            config.BALL_VZMAX,
+            "Z速度",
         )
         # draw_slider(slider_x, h_slider_y, h_slider_val, 0, ball_vmax, "水平速度")
 
-    if turn in (13, 14, 5):
+    if gs.turn in (13, 14, 5):
         # キャッチできるポイントを表示
         draw_candidates(screen, ballhit, ballcatch, ballcatchb, p2_pos_target)
-    if turn in (11, 12, 3):
+    if gs.turn in (11, 12, 3):
         draw_candidates(screen, ballhit, ballcatch, ballcatchb, p1_pos_target)
 
-    draw_ok_button(screen, ok_button_rect, fontname)  # OKボタンを表示する。
+    draw_ok_button(screen, ok_button_rect)  # OKボタンを表示する。
 
     draw_scoreboard(screen, message20, message2, gs)  # スコアーボードを表示する。
 
